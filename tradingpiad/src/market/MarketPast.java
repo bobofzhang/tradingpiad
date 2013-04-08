@@ -44,6 +44,7 @@ public class MarketPast extends Market{
 
 	public MarketPast(String filename,Wallet wallet) throws ExchangeError {
 		super();
+		
 		virtData= new VirtualData(this, wallet);
 		this.filename = filename;
 
