@@ -11,7 +11,7 @@ import strategies.Strategy;
 import utilities.Item;
 import utilities.Op;
 
-public abstract class TraderSkeleton implements Strategy {
+public abstract class TraderBase implements Strategy {
 
 	public abstract boolean shouldBuy();
 
