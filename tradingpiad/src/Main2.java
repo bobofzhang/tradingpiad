@@ -191,7 +191,7 @@ public class Main2 {
 		
 	
 		
-		//runStrat();
+		runStrat();
         TestIndicator.test();
         
 	}
