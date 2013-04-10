@@ -34,7 +34,7 @@ public class MarketPast extends Market{
 	VirtualData virtData;
 	
 	private String filename;
-	private String runName;	
+	private String runName;
 	
 	private long startTime;
 	private long endTime;
