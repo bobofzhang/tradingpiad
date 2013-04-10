@@ -1,19 +1,33 @@
 package market;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+
+import org.codehaus.jackson.map.ObjectMapper;
+
+import market.mtgox.MarketMtgox;
+
+import utilities.Assert;
 import utilities.Decimal;
 import utilities.Item;
 import utilities.LinkedList;
 import utilities.Op;
+import utilities.Util;
 
 public class MarketPast extends Market{
 	
@@ -42,11 +56,12 @@ public class MarketPast extends Market{
 	private boolean endofrun;
 	
 
-	public MarketPast(String filename,Wallet wallet) throws ExchangeError {
+	public MarketPast(String filename,Wallet wallet,long timeDelta) throws ExchangeError {
 		super();
-		
+		Assert.checkPrecond(timeDelta>0, "Erreur timeDeltra doit etre > a 0");
 		virtData= new VirtualData(this, wallet);
 		this.filename = filename;
+		this.timeDelta=timeDelta;
 
 		try {
 			FileInputStream fstream = new FileInputStream(this.filename);
@@ -66,7 +81,6 @@ public class MarketPast extends Market{
 			
 			startTime = Long.parseLong(br.readLine()); // Ligne 3: L'heure du debut du run en timestamp (celui qu'on recupere avec System.currentTimeMillis() )
 			endTime = Long.parseLong(br.readLine()); // Ligne 4: L'heure du debut du run en timestamp (celui qu'on recupere avec System.currentTimeMillis() )
-			timeDelta= Long.parseLong(br.readLine());
 			
 			curTime=startTime+1;
 			
@@ -242,9 +256,60 @@ public class MarketPast extends Market{
 	}
 	
 	
-	public static void retrieve(String filename){
-	// TODO Scirpt pour recuperer un historique (sur mtgox) 	
+	public static void retrieveMtgox(String filename, Currency cur, String startDateStr, String endDateStr) throws ParseException {
+		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		Date startDate = dateFormat.parse(startDateStr);
+		Date endDate = dateFormat.parse(endDateStr);
+
+		try {
+			startDate = dateFormat.parse(startDateStr);
+			endDate = dateFormat.parse(endDateStr);
+
+			long start = startDate.getTime();
+			long end = endDate.getTime();
+			FileWriter fstream = new FileWriter(filename);
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write(filename + "\n");
+			out.write("mtgox\n");
+			out.write("BTC");
+			out.write(cur.toString());
+			out.write("0.00001");
+			out.write("0.00000001");
+			out.write("5");
+			out.write("8");
+			out.write("0.6");
+			out.write(String.valueOf(start));
+			out.write(String.valueOf(end));
+
+			String last_tid = String.valueOf(start);
+			long last_time = start;
+
+			ObjectMapper mapper = MarketMtgox.produceMapper(Currency.BTC, cur);
+
+			while (last_time < end) {
+				URL url = new URL("http://data.mtgox.com/api/0/data/getTrades.php?Currency=" + cur + "&since=" + last_tid);
+				try {
+					String json = Util.getData(url);
+
+					Trade[] last_trades = mapper.readValue(json, Trade[].class);
+					for (Trade t : last_trades)
+						out.write(String.valueOf(t.date) + t.price.toString() + t.amount.toString() + t.tid + t.trade_type.toString() + "\n");
+					last_tid = last_trades[last_trades.length - 1].tid;
+					last_time = last_trades[last_trades.length - 1].date * 1000;
+				} catch (ExchangeError e) {
+					Thread.sleep(10000);
+					continue;
+				}
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+
 	}
+
 		
 
 }
