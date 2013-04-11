@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -60,6 +61,7 @@ public class MarketPast extends Market{
 		super();
 		Assert.checkPrecond(timeDelta>0, "Erreur timeDeltra doit etre > a 0");
 		virtData= new VirtualData(this, wallet);
+		this.last_trades=new Trade[0];
 		this.filename = filename;
 		this.timeDelta=timeDelta;
 
@@ -82,10 +84,11 @@ public class MarketPast extends Market{
 			startTime = Long.parseLong(br.readLine()); // Ligne 3: L'heure du debut du run en timestamp (celui qu'on recupere avec System.currentTimeMillis() )
 			endTime = Long.parseLong(br.readLine()); // Ligne 4: L'heure du debut du run en timestamp (celui qu'on recupere avec System.currentTimeMillis() )
 			
-			curTime=startTime+1;
+			curTime=startTime;
 			
 			this.ticker=new Ticker();
 			this.depth=new Depth();
+			System.out.println("cons marketpast"+this.depth);
 			this.depth.asks=new Order[1];
 			this.depth.bids=new Order[1];
 			
@@ -113,9 +116,9 @@ public class MarketPast extends Market{
 	@Override
 	public void updateTrades() throws ExchangeError {
 		new_trades = new ArrayList<Trade>(100);
-		
-		while (currentTrade !=null && currentTrade.date <= this.curTime / 1000) {
-
+		System.out.println(currentTrade.date);
+		System.out.println(this.curTime / 1000);
+		while (currentTrade !=null && (  depth.asks[0] ==null || depth.bids[0]==null || currentTrade.date <= this.curTime / 1000)) {
 				new_trades.add(currentTrade);
 				
 				if(currentTrade.trade_type.equals(Type.ASK)){
@@ -267,25 +270,25 @@ public class MarketPast extends Market{
 
 			long start = startDate.getTime();
 			long end = endDate.getTime();
+			Assert.checkPrecond(start<end, "Erreur date: il faut que la datre de fin soit après la date de debut");
 			FileWriter fstream = new FileWriter(filename);
 			BufferedWriter out = new BufferedWriter(fstream);
 			out.write(filename + "\n");
 			out.write("mtgox\n");
-			out.write("BTC");
-			out.write(cur.toString());
-			out.write("0.00001");
-			out.write("0.00000001");
-			out.write("5");
-			out.write("8");
-			out.write("0.6");
-			out.write(String.valueOf(start));
-			out.write(String.valueOf(end));
+			out.write("BTC\n");
+			out.write(cur.toString()+"\n");
+			out.write("0.00001\n");
+			out.write("0.00000001\n");
+			out.write("5\n");
+			out.write("8\n");
+			out.write("0.6\n");
+			out.write(String.valueOf(start)+"\n");
+			out.write(String.valueOf(end)+"\n");
 
-			String last_tid = String.valueOf(start);
-			long last_time = start;
+			String last_tid = String.valueOf((start-1800000)*1000);// Tid de mtgox en millionieme de seconde !
+			long last_time = start; // Tid de mtgox en millionieme de seconde !
 
 			ObjectMapper mapper = MarketMtgox.produceMapper(Currency.BTC, cur);
-
 			while (last_time < end) {
 				URL url = new URL("http://data.mtgox.com/api/0/data/getTrades.php?Currency=" + cur + "&since=" + last_tid);
 				try {
@@ -293,13 +296,19 @@ public class MarketPast extends Market{
 
 					Trade[] last_trades = mapper.readValue(json, Trade[].class);
 					for (Trade t : last_trades)
-						out.write(String.valueOf(t.date) + t.price.toString() + t.amount.toString() + t.tid + t.trade_type.toString() + "\n");
+						out.write(String.valueOf(t.date) +","+ t.price.toString() +","+ t.amount.toString() +","+ t.tid +","+ t.trade_type.toString() + "\n");
 					last_tid = last_trades[last_trades.length - 1].tid;
 					last_time = last_trades[last_trades.length - 1].date * 1000;
 				} catch (ExchangeError e) {
 					Thread.sleep(10000);
+					e.printStackTrace();
 					continue;
 				}
+				Calendar cal = Calendar.getInstance();
+				
+				cal.setTimeInMillis(last_time);
+				java.util.Date date = cal.getTime();
+				System.out.println(date);
 
 			}
 

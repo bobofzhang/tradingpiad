@@ -3,6 +3,7 @@ import java.math.BigDecimal;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -22,6 +23,7 @@ import market.Currency;
 import market.DataRetriever;
 import market.ExchangeError;
 import market.Market;
+import market.MarketPast;
 import market.Order;
 import market.Trade;
 import market.Type;
@@ -191,9 +193,29 @@ public class Main2 {
 		
 	
 		
-		runStrat();
-        TestIndicator.test();
+		//runStrat();
+        //TestIndicator.test();
+		
+		/*try {
+			MarketPast.retrieveMtgox("mtgox09092012_10092012.txt", Currency.USD, "09/10/2012", "10/10/2012");
+		} catch (ParseException e) {
+			System.out.println("erreur dates");
+		}*/
+		
+		runStratPast();
         
+	}
+	
+	public static void runStratPast() throws ExchangeError{
+		Wallet wal=new Wallet();
+		wal.setAmount(Currency.USD, new BigDecimal(1000.0));
+		Market m =new MarketPast("mtgox09092012_10092012.txt",wal,60000);
+		
+		
+		Strategy mmaking= new MarketMaking();
+		Agent a=new Agent(mmaking,m,wal);
+		a.init();
+		a.execute();
 	}
 	
 	
