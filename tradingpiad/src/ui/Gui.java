@@ -38,12 +38,14 @@ import strategies.marketmaking.ForecastStrategy;
 import strategies.marketmaking.MarketMaking;
 import utilities.Decimal;
 import forecast.TestIndicator;
+import javax.swing.JTabbedPane;
 
 
 public class Gui {
 
 	private JFrame frame;
 	private JTextField amount;
+	private JTextField textField;
 
 	/**
 	 * Launch the application.
@@ -55,7 +57,7 @@ public class Gui {
 		// Pour que ca fonctionne a l'univ !
 		System.setProperty("java.net.useSystemProxies", "true");
 		
-		// Pour r�soudre le probleme des certificats
+		// Pour resoudre le probleme des certificats
 		X509TrustManager trm = new X509TrustManager() {
             public X509Certificate[] getAcceptedIssuers() {
                 return null;
@@ -153,13 +155,13 @@ public class Gui {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(new MigLayout("", "[left][206.00,grow]", "[][][][][][][]"));
+		frame.getContentPane().setLayout(new MigLayout("", "[left][206.00,grow]", "[][][][][][][][]"));
 
 		JLabel lblNewLabel = new JLabel("Chose a Market");
 		frame.getContentPane().add(lblNewLabel, "cell 0 0");
 
 		final JComboBox market = new JComboBox();
-		market.setModel(new DefaultComboBoxModel(new String[] {"MtGox", "BTCE ", "BitStamp"}));
+		market.setModel(new DefaultComboBoxModel(new String[] {"MtGox", "BTCE", "BitStamp"}));
 		frame.getContentPane().add(market, "cell 1 0,growx");
 
 		JLabel lblChoseACurrency = new JLabel("Chose a currency 1");
@@ -175,10 +177,17 @@ public class Gui {
 		final JComboBox currency2 = new JComboBox();
 		currency2.setModel(new DefaultComboBoxModel(Currency.values()));
 		frame.getContentPane().add(currency2, "cell 1 2,growx");
+		
+		JLabel label = new JLabel("");
+		frame.getContentPane().add(label, "flowx,cell 0 4,alignx trailing");
+		
+		textField = new JTextField();
+		frame.getContentPane().add(textField, "cell 1 4,growx");
+		textField.setColumns(10);
 
 		
 		JLabel lblChooseAStrategy = new JLabel("Choose a Strategy");
-		frame.getContentPane().add(lblChooseAStrategy, "cell 0 4,alignx left");
+		frame.getContentPane().add(lblChooseAStrategy, "cell 0 5,alignx left");
 		
 		final JComboBox strategy = new JComboBox();
 		strategy.setModel(new DefaultComboBoxModel(new String[] {"Market Making", "Forecast"}));
@@ -187,7 +196,7 @@ public class Gui {
 		
 		
 		JLabel lblHowMuchDo = new JLabel("How much do you want to invest ? ");
-		frame.getContentPane().add(lblHowMuchDo, "cell 0 3,alignx trailing");
+		frame.getContentPane().add(lblHowMuchDo, "cell 0 3,alignx left");
 
 		amount = new JTextField();
 		frame.getContentPane().add(amount, "cell 1 3,growx");
@@ -211,25 +220,36 @@ public class Gui {
 				am = new Decimal(s);
 
 				
-				 c1 = (Currency) currency1.getEditor().getItem();
-				 c2 = (Currency) currency2.getEditor().getItem();
+				 c1 = (Currency) currency1.getSelectedItem();
+				 c2 = (Currency) currency2.getSelectedItem();
 				
-				if (strategy.getEditor().getItem().toString() == "Market Making"){
+				 
+				if (strategy.getSelectedItem().toString() == "Market Making"){
+
 					stra = new MarketMaking();
-				}else if ( strategy.getEditor().getItem().toString() == "Forecast"){
-					stra = new ForecastStrategy();
+				
+				}else if ( strategy.getSelectedItem().toString() == "Forecast"){
+					stra = new ForecastStrategy(new BigDecimal(1000));
 				}
 				
-				if(market.getEditor().getItem().toString() == "MtGox"){
+				
+				if(market.getSelectedItem().toString()=="MtGox"){
+					System.out.println(market.getSelectedItem().toString() );
+							try {
+								mar = new MarketMtgoxHistory(c1, c2,wal,"btce48h_3003.txt");
+							} catch (ExchangeError e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+	
+						
+				}
+				if (market.getSelectedItem().toString() == "BTCE"){
+					
+					System.out.println(market.getSelectedItem().toString() );
+					
 					try {
-						mar = new MarketMtgoxHistory(Currency.BTC, Currency.USD,wal,"btce48h_3003.txt");
-					} catch (ExchangeError e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}else if (market.getEditor().getItem().toString() == "BTCE"){
-					try {
-						mar = new MarketBtceHistory(Currency.BTC, Currency.USD,wal,"btce48h_3003.txt");
+						mar = new MarketBtceHistory(c1, c2,wal,"btce48h_3003.txt");
 					} catch (ExchangeError e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -238,12 +258,7 @@ public class Gui {
 				
 				
 					Agent a=new Agent(stra,mar,wal);
-					try {
-						TestIndicator.test();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+
 					try {
 						a.init();
 					} catch (ExchangeError e1) {
@@ -254,14 +269,17 @@ public class Gui {
 			}	
 		});
 		
-		frame.getContentPane().add(strategy, "cell 1 4,growx");
-		frame.getContentPane().add(btnRun, "cell 1 5,alignx center");
+		frame.getContentPane().add(strategy, "cell 1 5,growx");
+		frame.getContentPane().add(btnRun, "cell 1 6,alignx center");
 		
 		JSeparator separator = new JSeparator();
-		frame.getContentPane().add(separator, "cell 0 6,growx");
+		frame.getContentPane().add(separator, "cell 0 7,growx");
 
 		JSeparator separator_1 = new JSeparator();
-		frame.getContentPane().add(separator_1, "flowx,cell 1 6,growx");
+		frame.getContentPane().add(separator_1, "flowx,cell 1 7,growx");
+		
+		JLabel lblHowMuchDo_1 = new JLabel("How much do you want to start with ? ");
+		frame.getContentPane().add(lblHowMuchDo_1, "cell 0 4");
 
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
