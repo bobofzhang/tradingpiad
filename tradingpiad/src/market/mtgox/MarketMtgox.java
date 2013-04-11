@@ -131,4 +131,9 @@ public abstract class MarketMtgox extends Market {
 		return amount.setScale(8, RoundingMode.FLOOR);
 	}
 
+	public static ObjectMapper produceMapper(Currency btc, Currency cur) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
