@@ -12,6 +12,11 @@ public class Depth {
 	public Order[] asks;
 	public Order[] bids;
 	
+	public Depth(){
+		bids=new Order[0];
+		asks=new Order[0];
+	}
+	
 	public void reverseBids(){
 		Util.reverse(bids);
 	}

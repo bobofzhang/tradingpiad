@@ -35,6 +35,7 @@ public class MarketPast extends Market{
 	VirtualData virtData;
 	
 	private String filename;
+	@SuppressWarnings("unused")
 	private String runName;
 	
 	private long startTime;
@@ -53,8 +54,6 @@ public class MarketPast extends Market{
 	
 	private Trade currentTrade;
 	private ArrayList<Trade> new_trades;
-
-	private boolean endofrun;
 	
 
 	public MarketPast(String filename,Wallet wallet,long timeDelta) throws ExchangeError {
@@ -86,9 +85,8 @@ public class MarketPast extends Market{
 			
 			curTime=startTime;
 			
-			this.ticker=new Ticker();
+			this.ticker=new Ticker(new Decimal("10000000"),new Decimal("0"),new Decimal("100000"),new Decimal("0"),new Decimal("0"),new Decimal("100000"));
 			this.depth=new Depth();
-			System.out.println("cons marketpast"+this.depth);
 			this.depth.asks=new Order[1];
 			this.depth.bids=new Order[1];
 			
@@ -98,6 +96,7 @@ public class MarketPast extends Market{
 				e.printStackTrace();
 				System.exit(0);
 			}
+			updateTrades();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -116,8 +115,6 @@ public class MarketPast extends Market{
 	@Override
 	public void updateTrades() throws ExchangeError {
 		new_trades = new ArrayList<Trade>(100);
-		System.out.println(currentTrade.date);
-		System.out.println(this.curTime / 1000);
 		while (currentTrade !=null && (  depth.asks[0] ==null || depth.bids[0]==null || currentTrade.date <= this.curTime / 1000)) {
 				new_trades.add(currentTrade);
 				
@@ -130,13 +127,13 @@ public class MarketPast extends Market{
 					depth.bids[0]=new Order(currentTrade.price,currentTrade.amount,Type.BID);
 				}
 				ticker.last=currentTrade.price;
-				
 				if(currentTrade.price.compareTo(ticker.low)<0)
 					ticker.low=currentTrade.price;
 				
 				if(currentTrade.price.compareTo(ticker.high)<0)
 					ticker.high=currentTrade.price;
-				ticker.vol=Op.div(Op.add(ticker.vol, currentTrade.amount),new Decimal(curTime-startTime));
+				
+				ticker.vol=Op.div(Op.add(ticker.vol, currentTrade.amount),new Decimal(curTime-startTime+1000));
 				
 				
 				try {
@@ -182,12 +179,12 @@ public class MarketPast extends Market{
 
 	@Override
 	public LinkedList<Order> getOpenBids() {
-		return this.getOpenBids();
+		return this.virtData.getOpenBids();
 	}
 
 	@Override
 	public LinkedList<Order> getExecutedBids() {
-		return this.getExecutedBids();
+		return virtData.hist_bids;
 	}
 
 	@Override
@@ -281,7 +278,7 @@ public class MarketPast extends Market{
 			out.write("0.00000001\n");
 			out.write("5\n");
 			out.write("8\n");
-			out.write("0.6\n");
+			out.write("0.006\n");
 			out.write(String.valueOf(start)+"\n");
 			out.write(String.valueOf(end)+"\n");
 
