@@ -308,7 +308,8 @@ public class MarketPast extends Market{
 				System.out.println(date);
 
 			}
-
+			out.close();
+			fstream.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);

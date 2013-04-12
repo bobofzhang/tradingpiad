@@ -16,6 +16,7 @@ public class Wallet {
 			wallet[i]=BigDecimal.ZERO;
 	}
 	
+	
 	public BigDecimal getAmount(Currency c){
 		return wallet[c.ordinal()];
 	}
@@ -31,8 +32,16 @@ public class Wallet {
 		StringBuffer buf= new StringBuffer();
 		buf.append("{");
 		for(Currency c: Currency.values())
-			buf.append(c+":"+wallet[c.ordinal()]+", ");
+			buf.append(c+":"+wallet[c.ordinal()]+",");
 		buf.append("}");
 		return buf.toString();
+	}
+	
+	public Wallet clone(){
+		Wallet w= new Wallet();
+		for(int i=0; i< wallet.length;i++)
+			wallet[i]=this.getAmount(Currency.values()[i]);
+		return w;
+		
 	}
 }
