@@ -3,6 +3,8 @@ package ui;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.KeyManagementException;
@@ -13,15 +15,18 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
+import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -34,9 +39,6 @@ import market.bitstamp.MarketBitstampVirtual;
 import market.btce.MarketBtceHistory;
 import market.mtgox.MarketMtgoxHistory;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.JLabel;
-import javax.swing.JSplitPane;
-
 import strategies.Agent;
 import strategies.Strategy;
 import strategies.marketmaking.ForecastStrategy;
@@ -48,6 +50,8 @@ public class GuiTabbed {
 	private JFrame frame;
 	private JTextField amount;
 	private JTextField textField;
+	private JTextField loadPath1;
+	private JTextField loadPath2;
 
 
 	/**
@@ -299,9 +303,102 @@ public class GuiTabbed {
 		
 		JPanel panel_1 = new JPanel();
 		tabbedPane.addTab("Data Retreive", null, panel_1, null);
+		panel_1.setLayout(new MigLayout("", "[209.00][grow]", "[][][][]"));
+		
+		JLabel lblChooseAMethode = new JLabel("Choose a methode");
+		panel_1.add(lblChooseAMethode, "cell 0 0");
+		
+		JRadioButton rdbtnLive = new JRadioButton("Live");
+		panel_1.add(rdbtnLive, "flowx,cell 1 0");
+		rdbtnLive.setMnemonic(KeyEvent.VK_B);
+		rdbtnLive.setActionCommand("true");
+		rdbtnLive.setSelected(true);
+		
+		JRadioButton rdbtnPast = new JRadioButton("Past");
+		panel_1.add(rdbtnPast, "cell 1 0");
 		
 		
+		 ButtonGroup group = new ButtonGroup();
+		 group.add(rdbtnLive);
+		 group.add(rdbtnPast);   
+		 
+	//	rdbtnLive.addActionListener(this);
+	//	rdbtnPast.addActionListener(this);
+		 
+		
+	//	public void actionPerformed(ActionEvent e) { }
+		
+		JLabel lblChooseAMarket = new JLabel("Choose a market");
+		panel_1.add(lblChooseAMarket, "cell 0 1,alignx left");
+		lblChooseAMarket.setVisible(false);
+		
+		JComboBox data_market = new JComboBox();
+		data_market.setModel(new DefaultComboBoxModel(new String[] {"MtGox", "BTCE", "BitStamp"}));
+		panel_1.add(data_market, "cell 1 1,growx");
+		data_market.setVisible(false);
+		
+		
+		JLabel lblFilename = new JLabel("FileName 1 ");
+		panel_1.add(lblFilename, "cell 0 2,alignx left");
+		lblFilename.setVisible(false);
+		
+		
+		loadPath1 = new JTextField();
+		panel_1.add(loadPath1, "flowx,cell 1 2,alignx left");
+		loadPath1.setColumns(10);
+		loadPath1.setVisible(false);
+		
+		JLabel lblFilename_1 = new JLabel("FileName 2");
+		panel_1.add(lblFilename_1, "cell 0 3,alignx left");
+		lblFilename_1.setVisible(false);
+		
+		loadPath2 = new JTextField();
+		panel_1.add(loadPath2, "flowx,cell 1 3,alignx left");
+		loadPath2.setColumns(10);
+		loadPath2.setVisible(false);
+		
+		//Create a file chooser
+		final JFileChooser fc = new JFileChooser();
 
+		//In response to a button click:
+	//	int returnVal = fc.showOpenDialog(aComponent);
+		
+		
+		JButton btnLoadF1 = new JButton("Load");
+		btnLoadF1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int status = fc.showOpenDialog(null);
+				if(status == JFileChooser.APPROVE_OPTION){
+					File selectedFile = fc.getSelectedFile();
+					loadPath1.setText(selectedFile.getAbsolutePath());
+				}
+			} 
+		});
+		panel_1.add(btnLoadF1, "cell 1 2");
+		
+		JButton btnLoadF2 = new JButton("Load");
+		btnLoadF2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int status = fc.showOpenDialog(null);
+				if(status == JFileChooser.APPROVE_OPTION){
+					File selectedFile = fc.getSelectedFile();
+					loadPath2.setText(selectedFile.getAbsolutePath());
+				}
+			} 
+		});
+		panel_1.add(btnLoadF2, "cell 1 3");
+		
+		
+		
+		if(rdbtnLive.isSelected()){
+			rdbtnPast.setSelected(false);
+			lblChooseAMarket.setVisible(true);
+			data_market.setVisible(true);
+			lblFilename.setVisible(true);
+			loadPath1.setVisible(true);
+			lblFilename_1.setVisible(true);
+			loadPath2.setVisible(true);
+		}
 		
 		/**
 		 * The following part is the Application menu
