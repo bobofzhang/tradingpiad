@@ -3,16 +3,28 @@ import java.math.BigDecimal;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.xeiam.xchart.Chart;
+import com.xeiam.xchart.ChartBuilder;
+import com.xeiam.xchart.SwingWrapper;
+import com.xeiam.xchart.StyleManager.ChartType;
+import com.xeiam.xchart.StyleManager.LegendPosition;
+
 import forecast.TestIndicator;
 
 import strategies.Agent;
 import strategies.Strategy;
+import strategies.StrategyObserver;
 import strategies.marketmaking.ForecastStrategy;
 import strategies.marketmaking.MarketMaking;
 import utilities.CircularArray;
@@ -22,6 +34,7 @@ import market.Currency;
 import market.DataRetriever;
 import market.ExchangeError;
 import market.Market;
+import market.MarketPast;
 import market.Order;
 import market.Trade;
 import market.Type;
@@ -191,9 +204,33 @@ public class Main2 {
 		
 	
 		
-		runStrat();
-        TestIndicator.test();
+		//runStrat();
+        //TestIndicator.test();
+		
+		/*try {
+			MarketPast.retrieveMtgox("mtgox01082012_15082012.txt", Currency.USD, "01/08/2012", "15/08/2012");
+		} catch (ParseException e) {
+			System.out.println("erreur dates");
+		}*/
+		
+		runStratPast("mtgox01082012_15082012.txt");
         
+	}
+	
+	public static void runStratPast(String filename) throws ExchangeError{
+		Wallet wal=new Wallet();
+		wal.setAmount(Currency.USD, new BigDecimal(1000.0));
+		Market m =new MarketPast(filename,wal,60000);
+		
+		
+		Strategy mmaking= new MarketMaking();
+		Agent a=new Agent(mmaking,m,wal);
+		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);
+		a.addObserver(o);
+		a.init();
+		a.execute();
+		 new SwingWrapper(o.getChart()).displayChart();
+		 System.out.println("maxdd="+o.maxDrawDown());
 	}
 	
 	
@@ -216,6 +253,7 @@ public class Main2 {
 		
 
 	}
+	
 
 }
 

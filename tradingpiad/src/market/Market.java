@@ -29,6 +29,11 @@ public abstract class Market extends Observable{
 	protected String jsonTrades;
 	private TimeSerie ts ;
 	
+	Market() {
+		trades = new Trades(500);
+		ts = new TimeSerie(500, 600);
+	}
+	
 	public Market(Currency cur1, Currency cur2,String exchangeName){
 		Assert.nullCheck(cur1, cur2);
 		this.cur1=cur1;

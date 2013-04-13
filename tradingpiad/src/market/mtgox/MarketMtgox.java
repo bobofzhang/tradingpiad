@@ -37,29 +37,7 @@ public abstract class MarketMtgox extends Market {
 	public MarketMtgox(Currency cur1, Currency cur2) throws ExchangeError {
 		super(cur1, cur2,"mtgox");
 		fee_percent = new Decimal(0.006);
-
-		// JSON mapper inialisation
-		mapper = new ObjectMapper();
-		mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		mapper.configure(DeserializationConfig.Feature.USE_BIG_DECIMAL_FOR_FLOATS, false);
-
-		// Ajout d'un deserializer customise de Order pour passer de
-		// "[ prix, amount ]" dans le JSON �
-		// "new Order(prix,amount,Type.XXX) en Java"
-		SimpleModule testModule = new SimpleModule("MyModule", new Version(1, 0, 0, null));
-		testModule.addDeserializer(Order.class, new OrderDeserializer());
-		mapper.registerModule(testModule);
-
-		// Ajout d'un deserializer de Type customise pour passer de "ask" (resp.
-		// "bid") dans le JSON � "Type.ASK" (resp. "Type.BID") en Java
-		testModule = new SimpleModule("MyModule2", new Version(1, 0, 0, null));
-		testModule.addDeserializer(Type.class, new TypeDeserializer(true));// Inversed = true (pour l'instant si mtgox change pas encore..)
-		mapper.registerModule(testModule);
-
-		// Verification si la pair <cur1, cur2> est accepte par l'exchange
-		Assert.checkPrecond(cur1.equals(Currency.BTC), "Mtgox n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
-		Assert.checkPrecond(Arrays.asList(currency_list).contains(cur2), "Mtgox n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
-
+		mapper=MarketMtgox.produceMapper(cur1, cur2);
 	}
 
 	@Override
@@ -129,6 +107,33 @@ public abstract class MarketMtgox extends Market {
 
 	public BigDecimal roundAmount(BigDecimal amount) {
 		return amount.setScale(8, RoundingMode.FLOOR);
+	}
+
+	public static ObjectMapper produceMapper(Currency cur1, Currency cur2) {
+
+		// JSON mapper inialisation
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		mapper.configure(DeserializationConfig.Feature.USE_BIG_DECIMAL_FOR_FLOATS, false);
+
+		// Ajout d'un deserializer customise de Order pour passer de
+		// "[ prix, amount ]" dans le JSON �
+		// "new Order(prix,amount,Type.XXX) en Java"
+		SimpleModule testModule = new SimpleModule("MyModule", new Version(1, 0, 0, null));
+		testModule.addDeserializer(Order.class, new OrderDeserializer());
+		mapper.registerModule(testModule);
+
+		// Ajout d'un deserializer de Type customise pour passer de "ask" (resp.
+		// "bid") dans le JSON � "Type.ASK" (resp. "Type.BID") en Java
+		testModule = new SimpleModule("MyModule2", new Version(1, 0, 0, null));
+		testModule.addDeserializer(Type.class, new TypeDeserializer(true));// Inversed = true (pour l'instant si mtgox change pas encore..)
+		mapper.registerModule(testModule);
+
+		// Verification si la pair <cur1, cur2> est accepte par l'exchange
+		Assert.checkPrecond(cur1.equals(Currency.BTC), "Mtgox n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
+		Assert.checkPrecond(Arrays.asList(currency_list).contains(cur2), "Mtgox n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
+
+		return mapper;
 	}
 
 }

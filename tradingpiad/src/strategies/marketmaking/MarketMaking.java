@@ -29,8 +29,8 @@ public class MarketMaking implements Strategy {
 			System.out.println(e1);
 			return;
 		}
-		buyLimitTime = m.getStartTime() + ((m.getEndTime() - m.getStartTime())* 98)/ 100;
-		sellLimitTime = m.getStartTime() + ((m.getEndTime() - m.getStartTime()) * 99) / 100;
+		buyLimitTime = m.getStartTime() + ((m.getEndTime() - m.getStartTime())* 75)/ 100;
+		sellLimitTime = m.getStartTime() + ((m.getEndTime() - m.getStartTime()) * 90) / 100;
 
 		long currentTime = m.getCurrentTime();
 		

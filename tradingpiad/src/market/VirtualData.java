@@ -16,7 +16,6 @@ public class VirtualData {
 	
 	private Wallet wallet;
 	protected Market market;
-	private BigDecimal cur1Amount, cur2Amount;
 	
 	 
 	
@@ -36,8 +35,6 @@ public class VirtualData {
 		Assert.nullCheck(market,wallet);
 		this.wallet=wallet;
 		this.market=market;
-		this.cur1Amount=Decimal.ZERO;
-		this.cur2Amount=Decimal.ZERO;
 	}
 
 	public void addBid(Order o){
@@ -47,7 +44,6 @@ public class VirtualData {
 		o.amount=market.roundAmount(o.amount);
 		BigDecimal x=Op.mult(o.price, o.amount);
 		wallet.setAmount(market.cur2, Op.neg(x));
-		cur2Amount=Op.add(cur2Amount, x);
 		linked_bids.insert(o);
 		//bids.add(o);
 		//Collections.sort(bids);
@@ -59,7 +55,6 @@ public class VirtualData {
 		o.price=market.roundPrice(o.price);
 		o.amount=market.roundAmount(o.amount);
 		wallet.setAmount(market.cur1, Op.neg(o.amount));
-		cur1Amount=Op.add(cur1Amount, o.amount);
 		linked_asks.insert(o);
 		//asks.add(o);		
 		//Collections.sort(asks) ;
@@ -77,23 +72,29 @@ public class VirtualData {
 		if (item.e.trade_type == Type.ASK){
 			linked_asks.delete(item);
 			wallet.setAmount(market.cur1, item.e.amount);
-			this.cur1Amount=Op.sub(this.cur1Amount, item.e.amount);
 		}
 		
 		if(item.e.trade_type == Type.BID){
 			linked_bids.delete(item);
 			BigDecimal x=Op.mult(item.e.amount,item.e.price);
 			wallet.setAmount(market.cur2, x);
-			this.cur2Amount=Op.sub(this.cur2Amount, x);
 		}		
 	}
 	
 	public BigDecimal getInMarketCur1(){
-		return this.cur1Amount;
+		BigDecimal cur1Amount=Decimal.ZERO;
+		for(Item<Order> item:this.getOpenAsks()){
+			cur1Amount=Op.add(item.e.amount,cur1Amount);
+		}
+		return cur1Amount;
 	}
 	
 	public BigDecimal getInMarketCur2(){
-		return this.cur2Amount;
+		BigDecimal cur2Amount=Decimal.ZERO;
+		for(Item<Order> item:this.getOpenBids()){
+			cur2Amount=Op.add(Op.mult(item.e.amount,item.e.price),cur2Amount);
+		}
+		return cur2Amount;
 	}
 	
 	
