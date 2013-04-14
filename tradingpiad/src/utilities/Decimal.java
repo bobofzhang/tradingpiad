@@ -2,6 +2,9 @@ package utilities;
 
 import java.math.BigDecimal;
 
+/**
+ * Classe eritant de BigDecimal pour rnedre implicite l'utilisation de MathContext
+ */
 @SuppressWarnings("serial")
 public class Decimal extends BigDecimal {
 

@@ -1,19 +1,27 @@
 package strategies;
 
 import java.util.ArrayList;
-import java.util.Observable;
 
 import market.EndOfRun;
-import market.ExchangeError;
 import market.Market;
 import market.Wallet;
 
+/**
+ * Represente un agent trader generique.
+ * Prends en parametre une strategie
+ *
+ */
 public class Agent{
 	public Strategy strat;
 	public Market m;
 	public Wallet w;
-	public ArrayList<MyObserver> obsList;
+	public ArrayList<MyObserver> obsList;  // La liste des observeurs : classe externe anlaysant l'execution de la strategie de l'agent
 	
+	/**
+	 * @param strat La strategie
+	 * @param m Le marche
+	 * @param w Le protefeuille lié au amrche
+	 */
 	public Agent(Strategy strat,  Market m,Wallet w){
 		this.strat=strat;
 		this.m=m;
@@ -21,6 +29,9 @@ public class Agent{
 		obsList=new ArrayList<MyObserver>();
 	}
 	
+	/**
+	 * Demarrer le trading en executant la strategie en parametre
+	 */
 	public void execute(){
 		boolean fini=false;
 		while(!fini){
@@ -31,14 +42,10 @@ public class Agent{
 			catch(EndOfRun e){
 				fini=true;
 			}
-			System.out.println("End TimeDelta");
-			System.out.println("\n");
 			this.updateAllObserver();
 		}
 	}
 	
-	public void init() throws ExchangeError{
-	}
 
 	public Market[] getMarkets() {
 		return new Market[]{m};
@@ -48,10 +55,16 @@ public class Agent{
 		return w;
 	}
 	
+	/**
+	 * Ajouter un observeur
+	 */
 	public void addObserver(MyObserver a){
 		obsList.add(a);
 	}
 	
+	/**
+	 * Mise a jour des observeurs
+	 */
 	public void updateAllObserver(){
 		for(MyObserver a:obsList)
 			a.update(this);

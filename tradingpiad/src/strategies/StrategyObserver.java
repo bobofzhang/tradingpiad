@@ -20,12 +20,24 @@ import market.Currency;
 import market.Market;
 import market.Wallet;
 
+/**
+ * Permet de memoriser et analyser le comprortement d'une stategie au corus de son execution.
+ * Cette classe permet :
+ * - De retenir un historique du wallet au cours du temps.
+ * - D'avoir la moyenne et la variance des profits par rapport a cet historique
+ * - Avoir le madrawdown (perte maximale) toujorus apr rapport a cet historique du wallet
+ *
+ */
 public class StrategyObserver implements MyObserver {
 
 	long lastTime, timeDelta;
 	private final Currency refCurrency;
 	private List<Double> listValue;
 
+	/**
+	 * @param timeDelta Tous les combiens , on "photographie" l'etat du portfeuille au cours de l'execution de la strategie 
+	 * @param refCurrency Dans quelle monnaie on plot le resultat
+	 */
 	public StrategyObserver(long timeDelta, Currency refCurrency) {
 		this.refCurrency = refCurrency;
 		this.timeDelta = timeDelta;
@@ -95,20 +107,29 @@ public class StrategyObserver implements MyObserver {
 
 	}
 	
+	/**
+	 * @return liste des valeurs du portfeuille au corus du temps
+	 */
 	public List<Double> getWalletValueList(){
 		return listValue;
 	}
 	
+	/**
+	 * @return Liste des valeurs de l'evolution du portfeuille au cours du temps (si superieur 0, il y a augmentation sinon il y a descente )
+	 */
 	public double[] getWalletEvolution(){
 		double[] evTab= new double[listValue.size()-1];
 		
 		for(int i=1;i<listValue.size();i++){
-			evTab[i]=listValue.get(i).doubleValue()/listValue.get(i-1);
+			evTab[i]=listValue.get(i).doubleValue()/listValue.get(i-1)-1;
 		}
 		
 		return evTab;
 	}
 	
+	/**
+	 * @return L'ecart type de l'evolution
+	 */
 	public double standardDeviation(){
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		
@@ -120,6 +141,9 @@ public class StrategyObserver implements MyObserver {
 		return stats.getStandardDeviation();
 	}
 	
+	/**
+	 * @return La moyenne de l'evolution
+	 */
 	public double mean(){
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		
@@ -131,6 +155,10 @@ public class StrategyObserver implements MyObserver {
 		return stats.getMean();
 	}
 	
+	/**
+	 * Donne la perte maximale si on aurait commencer et terminer à trader aux pires moments
+	 * @return Le maxdrawdown
+	 */
 	public double maxDrawDown(){
 		double max=0;
 		double diff=0;
@@ -149,7 +177,7 @@ public class StrategyObserver implements MyObserver {
 		
 		for (int i = 0; i < listValue.size(); i++) {
 			prices.add(listValue.get(i).doubleValue());
-			dates.add(new Date((lastTime-listValue.size()+i+1)*timeDelta));
+			dates.add(new Date(lastTime-(listValue.size()-i-1)*timeDelta));
 		}
 
 		Chart chart = new ChartBuilder().chartType(ChartType.Area).width(800).height(600).title("AreaChart01").xAxisTitle("X").yAxisTitle("Y").build();
@@ -157,7 +185,7 @@ public class StrategyObserver implements MyObserver {
 		// Customize Chart
 		chart.getStyleManager().setChartTitleVisible(false);
 		chart.getStyleManager().setLegendPosition(LegendPosition.InsideNW);
-		chart.getStyleManager().setDatePattern("HH:mm");
+		chart.getStyleManager().setDatePattern("dd/MM");
 		chart.getStyleManager().setLocale(Locale.FRANCE);
 
 		// Series

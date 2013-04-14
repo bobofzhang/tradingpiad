@@ -6,8 +6,16 @@ import utilities.Assert;
 import utilities.Op;
 
 
+/**
+ * Un portefeuille contenant de l'argent dans les differenets monnais supportees
+ *
+ */
 public class Wallet {
 
+	/**
+	 * Un tableau des quantites d'argent dans le portefeuille.
+	 * A chaque indice correspond une monnaie , l'indice d'une currency est donne par la methode ordinal()
+	 */
 	public BigDecimal[] wallet;
 	
 	public Wallet(){
@@ -17,10 +25,18 @@ public class Wallet {
 	}
 	
 	
+	/**
+	 * @param c La monnaie dont on veut connaitre la quantite
+	 * @return La quantite de c
+	 */
 	public BigDecimal getAmount(Currency c){
 		return wallet[c.ordinal()];
 	}
 	
+	/**
+	 * @param c La monnaie qu'on veut ajouter
+	 * @param amount La quantite de c qu'on veut ajouter au portefeuille
+	 */
 	public void setAmount(Currency c, BigDecimal amount){
 		BigDecimal new_amount=Op.add(wallet[c.ordinal()],amount);
 		Assert.checkPrecond(new_amount.compareTo(BigDecimal.ZERO)>=0,"Forbidden action: Not enough "+c+" in the wallet");
@@ -37,6 +53,9 @@ public class Wallet {
 		return buf.toString();
 	}
 	
+	/* (non-Javadoc)
+	 * Copie profonde d'un wallet
+	 */
 	public Wallet clone(){
 		Wallet w= new Wallet();
 		for(int i=0; i< wallet.length;i++)

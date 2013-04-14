@@ -1,5 +1,9 @@
 package market;
 
+/**
+ * Exception lancee quand uen erreur se produit lors de la recuperation de donnees sur ue bourse d'echange 
+ *
+ */
 @SuppressWarnings("serial")
 public class ExchangeError extends Exception {
 

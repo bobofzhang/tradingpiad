@@ -2,6 +2,11 @@ package market;
 
 import java.math.BigDecimal;
 
+/**
+ * Infromations correspondant a la requete ticker des boruses d'echanges.
+ * Ensemble d'informations concises et generales sur l'etat du marche
+ *
+ */
 public class Ticker {
 	public BigDecimal sell, buy, low, high, vol,last;
 	

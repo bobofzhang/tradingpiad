@@ -10,6 +10,11 @@ import market.Order;
 import market.VirtualData;
 import market.Wallet;
 
+/**
+ * Classe implementant la gestion des donnees virtuelles (ordres virtuels et simulation de l'execution des ordres).
+ * En faite, elle ne fait qu'appeler les methodes correpondantes de la classe VirtualData.
+ *
+ */
 public class MarketBtceVirtual extends MarketBtceLive {
 
 	private VirtualData virtData;

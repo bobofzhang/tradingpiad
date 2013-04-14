@@ -5,13 +5,6 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.xeiam.xchart.Chart;
-import com.xeiam.xchart.ChartBuilder;
-import com.xeiam.xchart.StyleManager.ChartType;
-import com.xeiam.xchart.StyleManager.LegendPosition;
 import com.xeiam.xchart.SwingWrapper;
 
 import utilities.Decimal;
@@ -33,7 +26,7 @@ public class TestIndicator {
 		br.readLine();
 		br.readLine();
 		br.readLine();
-		TSDatum p;
+		TSPoint p;
 		MACD macd= new MACD();
 		MoneyFlow mfi= new MoneyFlow();
 		while((line=br.readLine()) != null){

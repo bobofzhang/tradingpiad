@@ -13,9 +13,15 @@ import utilities.Decimal;
 import utilities.Item;
 import utilities.Op;
 
+/**
+ * Strategie d'achat-vente si le spread est gros. (Ce qu'on avait compris du market making)
+ * La strategie est de surveiller le spread et si celui ci est suffisamment gros on place une demande pour faire une offre juste apres en placant des ordres les plus competitifs possibles
+ * Cette strategie utilise l'historique des ordres virtuels executes et revend uniquement si c'est rentable,
+ * Neanmoins les bitcoins restant a la fin sont vendus
+ *
+ */
 public class MarketMaking implements Strategy {
 	private BigDecimal maxbtc; // Nombre max de bitcoin qu'on veut avoir en possession
-	private BigDecimal nieme= new Decimal("4");
 
 	public MarketMaking() {
 	}
@@ -42,7 +48,7 @@ public class MarketMaking implements Strategy {
 		System.out.println(buyPrice);
 		System.out.println(sellPrice);
 		
-		maxbtc=new Decimal("10");
+		maxbtc=new Decimal("100");
 		BigDecimal buyAmount = Op.sub(maxbtc, m.getTotalCur1Amount()); // Montant qu'on veut acheter (<= � 0 si on veut rien acheter)
 		BigDecimal buyAmountPossible;
 		
@@ -58,7 +64,7 @@ public class MarketMaking implements Strategy {
 		// Si il reste du temps pour acheter et si le montant est positif
 		System.out.println("profit=" + m.getProfit(sellPrice, buyPrice));
 		System.out.println(currentTime + "and" + buyLimitTime + "," + m.getOpenBids().isEmpty() + "," + buyAmountPossible.compareTo(new Decimal(1.0)));
-		if (currentTime <= buyLimitTime && m.getOpenBids().isEmpty() && buyAmountPossible.compareTo(new Decimal(1.0)) > 0) {
+		if (currentTime <= buyLimitTime && m.getTotalCur1Amount().compareTo(maxbtc)<0 && buyAmountPossible.compareTo(new Decimal(1.0)) > 0) {
 			System.out.println("buyAmount=" + buyAmountPossible);
 			System.out.println("price=" + buyPrice);
 			System.out.println("totalprice=" + Op.mult(buyPrice, buyAmountPossible));

@@ -27,6 +27,7 @@ import strategies.Strategy;
 import strategies.StrategyObserver;
 import strategies.marketmaking.ForecastStrategy;
 import strategies.marketmaking.MarketMaking;
+import strategies.marketmaking.ProfitMarketMaking;
 import utilities.CircularArray;
 import utilities.Decimal;
 import utilities.Item;
@@ -64,6 +65,7 @@ public class Main2 {
             public void checkServerTrusted(X509Certificate[] certs, String authType) {
             }
         };
+        
 
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, new TrustManager[] { trm }, null);
@@ -208,28 +210,36 @@ public class Main2 {
         //TestIndicator.test();
 		
 		/*try {
-			MarketPast.retrieveMtgox("mtgox01082012_15082012.txt", Currency.USD, "01/08/2012", "15/08/2012");
+			MarketPast.retrieveMtgox("mtgox10042013_13042013.txt", Currency.USD, "10/04/2013", "13/04/2013");
 		} catch (ParseException e) {
 			System.out.println("erreur dates");
 		}*/
 		
+		
+		
 		runStratPast("mtgox01082012_15082012.txt");
+		//runStratPast("mtgox10042013_13042013.txt");
         
+		//runStrat();
 	}
 	
 	public static void runStratPast(String filename) throws ExchangeError{
 		Wallet wal=new Wallet();
-		wal.setAmount(Currency.USD, new BigDecimal(1000.0));
+		wal.setAmount(Currency.USD, new BigDecimal("1000"));
+		wal.setAmount(Currency.BTC, new BigDecimal("0"));
 		Market m =new MarketPast(filename,wal,60000);
 		
 		
+		//Strategy mmaking= new ProfitMarketMaking(m, new Decimal("0.0"), 3600, new Decimal("0.1"));
 		Strategy mmaking= new MarketMaking();
+		//Strategy mmaking = new ForecastStrategy(new Decimal("100"));
 		Agent a=new Agent(mmaking,m,wal);
 		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);
 		a.addObserver(o);
-		a.init();
 		a.execute();
 		 new SwingWrapper(o.getChart()).displayChart();
+		 new SwingWrapper(m.getTs().getChart()).displayChart();
+		 
 		 System.out.println("maxdd="+o.maxDrawDown());
 	}
 	
@@ -246,10 +256,13 @@ public class Main2 {
 		//d.retrieve();
 		
 		
-		Strategy mmaking= new MarketMaking();
+		Strategy mmaking= new ProfitMarketMaking(m, new Decimal("0.001"), 30, new Decimal("0.2"));
 		Agent a=new Agent(mmaking,m,wal);
-		a.init();
+		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);
+		a.addObserver(o);
 		a.execute();
+		 new SwingWrapper(o.getChart()).displayChart();
+		 System.out.println("maxdd="+o.maxDrawDown());
 		
 
 	}

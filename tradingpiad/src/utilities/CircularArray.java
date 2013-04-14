@@ -44,15 +44,25 @@ public class CircularArray<E> implements Iterable<E>{
 		f=(f+1)%tab.length;	
 	}
 	
+	/**
+	 * @param i
+	 * @return Le ieme element du tableau
+	 */
 	public E get(int i){
 		Assert.checkPrecond(i>=0 && i<size,"Index out of bound");
 		return tab[(d+i)%tab.length];
 	}
 	
+	/**
+	 * @return Le dernier element du tableau
+	 */
 	public E getLast(){
 		return tab[(d+size-1)%tab.length];
 	}
 	
+	/**
+	 * @return La taille du tableau
+	 */
 	public int size(){
 		return size;
 	}

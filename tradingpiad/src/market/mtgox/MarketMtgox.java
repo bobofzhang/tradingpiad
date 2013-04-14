@@ -27,6 +27,10 @@ import utilities.Assert;
 import utilities.Decimal;
 import utilities.Op;
 
+/** 
+ * Classe implementant la transformation des donnees json en objets java pour la bourse d'echange Mtgox.
+ * Elle defini aussi divers informations specifiques a cette bourse (precision des prix, frais de transaction,etc..)
+ */
 public abstract class MarketMtgox extends Market {
 
 	private final static Currency[] currency_list = { Currency.USD, Currency.AUD, Currency.CAD, Currency.CHF, Currency.CNY, Currency.DKK, Currency.EUR, Currency.GBP, Currency.HKD, Currency.JPY, Currency.NZD, Currency.PLN, Currency.RUB, Currency.SEK, Currency.SGD, Currency.THB };

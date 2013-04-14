@@ -2,14 +2,11 @@ package forecast;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import com.xeiam.xchart.Chart;
 import com.xeiam.xchart.ChartBuilder;
 import com.xeiam.xchart.StyleManager.ChartType;
-import com.xeiam.xchart.StyleManager.LegendPosition;
 
 import utilities.CircularArray;
 import utilities.Decimal;
@@ -50,7 +47,7 @@ public class MACD implements Indicator {
 	}
 	
 	@Override
-	public void feed(TSDatum d) {
+	public void feed(TSPoint d) {
 		BigDecimal p = d.getClose();
 		BigDecimal ema1_2 = Op.sub(ema1.getValue(p), ema2.getValue(p));
 		cur =Op.sub(ema1_2,ema3.getValue(ema1_2));

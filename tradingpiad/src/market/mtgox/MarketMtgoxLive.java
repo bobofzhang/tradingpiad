@@ -8,6 +8,10 @@ import market.EndOfRun;
 import market.ExchangeError;
 import utilities.Util;
 
+/**
+ * Classe implementant la procedure de recuperation des donnees json dans le cas d'une simulation live ou d'une possible implementation reelle
+ *
+ */
 public abstract class MarketMtgoxLive extends MarketMtgox {
 
 	private URL url_ticker;

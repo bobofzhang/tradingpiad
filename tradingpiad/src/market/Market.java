@@ -16,6 +16,11 @@ import utilities.LinkedList;
 import utilities.Op;
 
 
+/**
+ * Un objet Market est caracterise par un triplet (monnaie 1, monnaie 2, bourse d'echange,).
+ * Il donne accès  aux informations du marché et permet d'interagir avec lui.
+ * C'est en quelque sorte une interface entre l'agent trader et l'environnement de trading
+ */
 public abstract class Market extends Observable{
 	public Currency cur1;
 	public Currency cur2;
@@ -31,7 +36,7 @@ public abstract class Market extends Observable{
 	
 	Market() {
 		trades = new Trades(500);
-		ts = new TimeSerie(500, 600);
+		ts = new TimeSerie(500, 7200);
 	}
 	
 	public Market(Currency cur1, Currency cur2,String exchangeName){
@@ -44,18 +49,37 @@ public abstract class Market extends Observable{
 		
 	}
 	
+	/**
+	 * @return Le ticker obtenu lors de l'update la plus recente
+	 */
 	public Ticker getTicker(){
 		return ticker;
 	}
+	
+	/**
+	 * @return La depth (=le cahier des ordres) obtenu lors de l'update la plus recente
+	 */
 	public  Depth getDepth(){
 		return depth;
 	}
+	
+	
+	/**
+	 * @return Les (pour l'instant 500) derniers echanges obtenu lors de la derniere update
+	 */
 	public  Trades getTrades(){
 		return trades;
 	}
 	
+	/**
+	 * Actualise les informations du marché
+	 * @throws ExchangeError Si l'update a echoué
+	 */
 	public void updateAll() throws ExchangeError{
-	    ExecutorService executor = Executors.newFixedThreadPool(3);
+		// On cree un pool de 3 thread
+	    ExecutorService executor = Executors.newFixedThreadPool(3); 
+	    
+	    // Code a executer pour le 1er thread (thread "speciaux" retournant des valeurs)
 	    Callable<ExchangeError> ticker_callable = new Callable<ExchangeError>() {
 	        @Override
 	        public ExchangeError call() {
@@ -69,6 +93,7 @@ public abstract class Market extends Observable{
 	    };
 	    Future<ExchangeError> ticker_future = executor.submit(ticker_callable);
 	    
+	 // Code a executer pour le 2e thread
 	    Callable<ExchangeError> trades_callable = new Callable<ExchangeError>() {
 	        @Override
 	        public ExchangeError call() {
@@ -82,13 +107,14 @@ public abstract class Market extends Observable{
 	    };
 	    Future<ExchangeError> trades_future = executor.submit(trades_callable);
 	    
+	 // Code a executer pour le 3e thread
 	    Callable<ExchangeError> depth_callable = new Callable<ExchangeError>() {
 	        @Override
 	        public ExchangeError call() {
 	            try {
 					updateDepth();
 				} catch (ExchangeError e) {
-					return e;
+					return e; 
 				}
 	            return null;
 	        }
@@ -97,83 +123,225 @@ public abstract class Market extends Observable{
 	    
 	    executor.shutdown();
 	    try {
+	    	// On attends la fin du 1er thread et on recupere son resultat
 	    	ExchangeError ticker_ex=ticker_future.get();
 			if (ticker_ex != null)
-				throw ticker_ex;
-	    	ExchangeError trades_ex=trades_future.get();
+				throw ticker_ex; // On lance l'erreur une erreur s'il y en a une
+	    	
+			// On attends la fin du 2e thread et on recupere son resultat
+			ExchangeError trades_ex=trades_future.get();
 	    	if (trades_ex != null)
-				throw trades_ex;
+				throw trades_ex; 
+	    	
+	    	// On attends la fin du 3e thread et on recupere son resultat
 	    	ExchangeError depth_ex=depth_future.get();
 	    	if (depth_ex != null)
-				throw depth_ex;
+				throw depth_ex;  
 			
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
-	    check();
+	    check();// On verifie si des ordres on ete executes
 	}
 	
 
+	/**
+	 * @return Le json du ticker (! Pas implemente dans MarketPast)
+	 */
 	public String getJsonTicker(){
 		return jsonTicker;
 	}
+	
+	/**
+	 * @return Le json du cahier des ordres (! Pas implemente dans MarketPast)
+	 */
 	public String getJsonDepth(){
 		return jsonDepth;
 	}
 	
+	
+	/**
+	 * @return Le json des trades (! Pas implemente dans MarketPast)
+	 */
 	public String getJsonTrades(){
 		return jsonTrades;
 	}
 	
 	
+	/**
+	 * Actualisation du ticker
+	 * @throws ExchangeError
+	 */
 	public abstract void updateTicker() throws ExchangeError;
+	
+	/**
+	 *  Actualisation du cahier des ordres
+	 * @throws ExchangeError
+	 */
 	public abstract void updateDepth() throws ExchangeError;
+	
+	/**
+	 * Actualisation des derniers echanges
+	 * @throws ExchangeError
+	 */
 	public abstract void updateTrades() throws ExchangeError;
 	
+	/**
+	 * Fait passer le temps de timeDelta millisecondes
+	 * @throws EndOfRun Si a l'issu de l'attente, on a depasser la date de fin du run
+	 */
 	public abstract void waitTimeDelta() throws EndOfRun;
+	
+	/**
+	 * @return Date de depart du run en time millis
+	 */
 	public abstract long getStartTime();
+	
+	/**
+	 * @return Date courant en time millis
+	 */
 	public abstract long getCurrentTime();
+	
+	
+	/**
+	 * @return Date de fin du run
+	 */
 	public abstract long getEndTime();
 	
+	/**
+	 * @return La liste des asks vurtuels de l'agent trader
+	 */
 	public abstract LinkedList<Order> getOpenAsks();
+	
+	/**
+	 * @return La liste des bids virtuels de l'agent trader
+	 */
 	public abstract LinkedList<Order> getOpenBids();
+	
+	
+	/**
+	 * @return La liste des bids executes
+	 */
 	public abstract LinkedList<Order> getExecutedBids();
+	
+	
+	/**
+	 * @param o Un ordre, doit etre de type ASK
+	 */
 	public abstract void addAsk(Order o);
+	
+	/**
+	 * @param o Un ordre, doit etre de type BID
+	 */
 	public abstract void addBid(Order o);
+	
+	
+	/**
+	 * 
+	 * Supprimme un ordre du marche (!! On doit bien utiliser cette methode et pas supprimmer els elements des listes directement )
+	 * @param item Item contenant l'ordre a supprimmer (obtenu via getOpenBids() ou getOpenAsks() )
+	 */
 	public abstract void cancelOrder(Item<Order> item);
+	
+	
+	/**
+	 * @return Recuperer le portefeuille associe a la bourse echange auquel appartient le marché (plusieurs marche peuvent partager un meme portefeuille)
+	 */
 	public abstract Wallet getWallet();
+	
+	
+	/**
+	 * @return La quantite de cur1 investi dans le marche
+	 */
 	public abstract BigDecimal getInMarketCur1();
+	
+	
+	/**
+	 * @return La quantite de cur2 investi dans la marche
+	 */
 	public abstract BigDecimal getInMarketCur2();
 	
+	
+	
+	/**
+	 * @return La quantite de cur1 +dans le wallet plus celle dans le marche
+	 */
 	public BigDecimal getTotalCur1Amount(){
 		return Op.add(this.getInMarketCur1(),getWallet().getAmount(cur1));
 	}
+	
+	/**
+	 * @return La quantite de cur2 dans le wallet plus celle dans le marche
+	 */
 	public BigDecimal getTotalCur2Amount(){
 		return Op.add(this.getInMarketCur2(),getWallet().getAmount(cur2));
 	}
+	/**
+	 * Analyse els echange recents non analyser (fera rien dans le cas reel)
+	 */
 	public abstract void check();
 	
+	/**
+	 * Methode pour arrondir les prix. La maniere d'arrondir un pris avrie selon les bourses d'echanges (selon le nombre de chiffre apprès la virgule autorise)
+	 * @param price Un prix qu'on veut arrondir
+	 * @return Un arrondi du prix selon la precision des prix de ce marche (peut varier d'un marche a l'autre)
+	 */
 	public abstract BigDecimal roundPrice(BigDecimal price);
+	
+	/**
+	 * Methode pour arrondir les quantites 
+	 * @param amount Une quantite qu'on veut arrondir
+	 * @return Un arrondi de la quantite selon la precision des quantites de ce marche (peut varier d'un marche a l'autre)
+	 */
 	public abstract BigDecimal roundAmount(BigDecimal amount);
+	
+	
+	/**
+	 * @return La precision des prix sur ce marche
+	 */
 	public abstract BigDecimal getPricePrecision();
+	
+	
+	/**
+	 * @return La precision des quantites sur ce marche
+	 */
 	public abstract BigDecimal getAmountPrecision();
 	
+	/**
+	 * @param amount Une quantite d'une currency quelconque
+	 * @return Cette quntite moins les frais de transaction (si par exemple on a gagner cette qauntite
+	 */
 	public abstract BigDecimal subFee(BigDecimal amount);
 	
+	/**
+	 * @param ask Le prix ou on vend
+	 * @param bid Le prix ou on achete
+	 * @return Le profit si on achete a prix bid et on revnd au pirx ask
+	 */
 	public BigDecimal getProfit(BigDecimal ask, BigDecimal bid){
 		return Op.sub(subFee(subFee(ask)),bid);
 	}
 
+	/**
+	 * @return Le nomd e la boruse d'echange (par exemple Mtgox)
+	 */
 	public String getExchangeName(){
 		return exchangeName;
 	}
 	
+	/**
+	 * @return une time serie tracant l'evolutiondes prix du marche
+	 */
 	public TimeSerie getTs() {
 		return ts;
 	}
 
+	/**
+	 * Changer de timeSerie
+	 * @param ts Nouvelle time serie
+	 */
 	public void setTs(TimeSerie ts) {
 		this.ts = ts;
 	}

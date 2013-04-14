@@ -9,6 +9,11 @@ import market.Currency;
 import market.EndOfRun;
 import market.ExchangeError;
 
+
+/**
+ * Classe implementant la procedure de recuperation des donnees json dans le cas d'une simulation live ou d'une possible implementation reelle
+ *
+ */
 public abstract class MarketBtceLive extends MarketBtce {
 
 	private URL url_trades;

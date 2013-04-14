@@ -2,7 +2,11 @@ package forecast;
 
 import java.math.BigDecimal;
 
-public class TSDatum {
+/**
+ * Un point d'une serie temporelle financiere 
+ *
+ */
+public class TSPoint{
 	BigDecimal volume;
 	BigDecimal high;// Plus haut prix
 	BigDecimal low; // Plus bas prix
@@ -10,7 +14,7 @@ public class TSDatum {
 	BigDecimal close; // Prix de fermeture --> Celui à prendre pour les estimations 
 
 	
-	public TSDatum(BigDecimal volume, BigDecimal high,BigDecimal low,BigDecimal open,BigDecimal close){
+	public TSPoint(BigDecimal volume, BigDecimal high,BigDecimal low,BigDecimal open,BigDecimal close){
 		this.volume=volume;
 		this.high=high;
 		this.low=low;

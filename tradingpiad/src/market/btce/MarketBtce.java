@@ -29,6 +29,11 @@ import utilities.Decimal;
 import utilities.Op;
 import utilities.Util;
 
+
+/** 
+ * Classe implementant la transformation des donnees json en objets java pour la bourse d'echange Btce.
+ * Elle defini divers informations specifiques a cette bourse (precision des prix, frais de transaction)
+ */
 public abstract class MarketBtce extends Market {
 
 	private ObjectMapper mapper;

@@ -5,6 +5,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * Une liste doublement chainee
+ *
+ * @param <E> Le typed es donnes satellites
+ */
 public class LinkedList<E> implements Iterable<Item<E>> {
 	private Item<E> head;
 	private Comparator<? super E> comp;

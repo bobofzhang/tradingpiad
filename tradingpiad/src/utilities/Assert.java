@@ -1,5 +1,9 @@
 package utilities;
 
+/**
+ * Classe utilitaire fournissant un moyen convenient de lancer des exception si des conditions ne sont pas respectes. (dans l'optique d'une methode  programmation par contrat)
+ *
+ */
 public class Assert {
 	
 	public static void nullCheck(Object... objects){

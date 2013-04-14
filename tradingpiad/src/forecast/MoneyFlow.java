@@ -33,7 +33,7 @@ public class MoneyFlow implements Indicator{
 	}
 	
 	@Override
-	public void feed(TSDatum d){
+	public void feed(TSPoint d){
 		BigDecimal typicalPrice= Op.div(Op.add(Op.add(d.getClose(),d.getHigh()),d.getLow()),new Decimal("3"));
 		BigDecimal moneyFlow=Op.mult(typicalPrice, d.getVolume());
 		if( typicalPrice.compareTo(prevTypicalPrice)>0)

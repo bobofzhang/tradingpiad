@@ -10,8 +10,16 @@ import market.ExchangeError;
 import market.Trade;
 import market.Trades;
 
+/**
+ * Quelques fonctions utilitaires en vrac
+ *
+ */
 public class Util {
 
+	/**
+	 * Inverser un tableau
+	 * @param tab Un tableau
+	 */
 	public static <E> void reverse(E[] tab) {
 		for (int i = 0; i < tab.length / 2; i++) {
 			E tmp = tab[i];
@@ -20,6 +28,12 @@ public class Util {
 		}
 	}
 
+	/**
+	 * Telecharger le contenu d'un lien sur le web
+	 * @param url Le lien dont on souhaite telecharger le contenu
+	 * @return Une chaine de caractere contenant le contenu retournee par la reuqte http
+	 * @throws ExchangeError
+	 */
 	public static String getData(URL url) throws ExchangeError{
 		HttpURLConnection conn;
 		try {
@@ -38,6 +52,8 @@ public class Util {
 			throw new ExchangeError(e1.getMessage());
 		}
 	}
+	
+	
 	/**
 	 * Methode pour filtrer que les echanges jamais vu dans le cas ou on peut pas le faire avec l'API (btc-e et bitstamp)
 	 */
@@ -48,7 +64,7 @@ public class Util {
 			int nb_new_trades = 0;// On va compter le nombre de vrais nouveaux
 			// trades
 			if (hist.size() > 0) {
-				// tant que les echanges recus sont plus r�cents que le dernier
+				// tant que les echanges recus sont plus recents que le dernier
 				// recu
 				while (nb_new_trades<tmp_last_trades.length && !tmp_last_trades[nb_new_trades].tid.equals(hist.getLast().tid)) {
 					nb_new_trades++;
@@ -58,7 +74,7 @@ public class Util {
 				// sont nouveaux
 				nb_new_trades = tmp_last_trades.length;
 
-			// L� on les ajoute � l'envers car btce inverse l'ordre
+			// La on les ajoute � l'envers car btce inverse l'ordre
 			Trade[] last_trades = new Trade[nb_new_trades];
 			for (int j = 0; j < last_trades.length; j++)
 				last_trades[j] = tmp_last_trades[nb_new_trades - 1 - j];
@@ -67,6 +83,9 @@ public class Util {
 		}
 	}
 	
+	/**
+	 * Convertir un InputStream en String
+	 */
 	public static String convertStreamToString(InputStream is) {
 	    Scanner s = new java.util.Scanner(is,"UTF-8").useDelimiter("\\A");
 	    return s.hasNext() ? s.next() : "";

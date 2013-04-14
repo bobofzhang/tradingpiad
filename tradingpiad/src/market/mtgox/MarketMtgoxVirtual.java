@@ -10,8 +10,11 @@ import market.Wallet;
 import utilities.Item;
 import utilities.LinkedList;
 
-
-
+/**
+ * Classe implementant la gestion des donnees virtuelles (ordres virtuels et simulation de l'execution des ordres).
+ * En faite, elle ne fait qu'appeler les methodes correpondantes de la classe VirtualData.
+ *
+ */
 public class MarketMtgoxVirtual extends MarketMtgoxLive{
 
 	private VirtualData virtData;

@@ -30,6 +30,12 @@ import utilities.LinkedList;
 import utilities.Op;
 import utilities.Util;
 
+/**
+ * Implemenation de Market fonctionnant a partir d'un histori d'echange (pas de cahier des ordres ).
+ * Pour faire une simulation sur des donnees historiques du passe, il faut utiliser cette classe car on ne trouve que l'historique des echanges dans le passe.
+ * Cette classe fournit aussi une methode de classe permettant de recoler ce genre de donnees (uniquement sur Mtgox)
+ * 
+ */
 public class MarketPast extends Market{
 	
 	VirtualData virtData;
@@ -56,7 +62,12 @@ public class MarketPast extends Market{
 	private ArrayList<Trade> new_trades;
 	
 
-	public MarketPast(String filename,Wallet wallet,long timeDelta) throws ExchangeError {
+	/**
+	 * @param filename Le fichier ou l'historique des donnes est stocke
+	 * @param wallet Le portefeuille
+	 * @param timeDelta Le temps qu'on attends entre chaque update en milissecondes
+	 */
+	public MarketPast(String filename,Wallet wallet,long timeDelta) {
 		super();
 		Assert.checkPrecond(timeDelta>0, "Erreur timeDeltra doit etre > a 0");
 		virtData= new VirtualData(this, wallet);
@@ -256,6 +267,15 @@ public class MarketPast extends Market{
 	}
 	
 	
+	/**
+	 * Recolter des donnes historiques du passe
+	 * 
+	 * @param filename Le nom du fichier ou on suavegarde les donnes
+	 * @param cur La monnaie du macrhé qu'on souhaite (USD,EUR,etc..)
+	 * @param startDateStr La date de debut au format dd/MM/yyyy
+	 * @param endDateStr La date de fin au format dd/MM/yyyy
+	 * @throws ParseException Si une errreur dans la date
+	 */
 	public static void retrieveMtgox(String filename, Currency cur, String startDateStr, String endDateStr) throws ParseException {
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		Date startDate = dateFormat.parse(startDateStr);
@@ -267,7 +287,7 @@ public class MarketPast extends Market{
 
 			long start = startDate.getTime();
 			long end = endDate.getTime();
-			Assert.checkPrecond(start<end, "Erreur date: il faut que la datre de fin soit aprÃ¨s la date de debut");
+			Assert.checkPrecond(start<end, "Erreur date: il faut que la date de fin soit apres la date de debut");
 			FileWriter fstream = new FileWriter(filename);
 			BufferedWriter out = new BufferedWriter(fstream);
 			out.write(filename + "\n");

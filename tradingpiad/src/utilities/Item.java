@@ -1,5 +1,10 @@
 package utilities;
 
+/**
+ * Un item dans une LinkedList
+ *
+ * @param <E> Le type des donnes satellites
+ */
 public final class Item<E> {
 
 	public Item<E> previous, next;

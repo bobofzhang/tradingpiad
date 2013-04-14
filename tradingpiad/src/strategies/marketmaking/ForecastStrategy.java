@@ -14,6 +14,16 @@ import utilities.Forecast;
 import utilities.Item;
 import utilities.Op;
 
+/**
+ * Strategie d'achat-vente avec prediction sur l'evolution des prix.
+ * La methode de prediction consiste a compter les montes et les descentes sur la serie temporelle des prix (voir classe TimeSerie).
+ * S'il y a beaucoup de montes , on estime que le prix risque de monter, s'il y a beaucoup de descentes , on estime qu'il va descendre.
+ * 
+ * Si le prix monte on achete, s'il descend vont descendre on vend
+ * 
+ * A la fin on vend quand meme pour finir avec que de l'argent (plus de bitcoins)
+ *
+ */
 public class ForecastStrategy implements Strategy{
 
 	private BigDecimal maxbtc;
@@ -23,9 +33,6 @@ public class ForecastStrategy implements Strategy{
 	private int window_size = 10 ; 
 	private long buyLimitTime, sellLimitTime;
 	
-	
-	public ForecastStrategy() {
-	}
 	
 	public ForecastStrategy(BigDecimal maxbtc) {
 		this.maxbtc = maxbtc;

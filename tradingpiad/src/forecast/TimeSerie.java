@@ -1,8 +1,6 @@
 package forecast;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,23 +12,27 @@ import com.xeiam.xchart.StyleManager.ChartType;
 import com.xeiam.xchart.StyleManager.LegendPosition;
 
 import market.Trade;
-import utilities.Assert;
 import utilities.CircularArray;
 import utilities.Decimal;
 import utilities.Op;
 
+/**
+ * Classe representant une serie temporelle financiere(comme celle qu'on peut voir sur https://mtgox.com/ )
+ * Chaque point de la serie est caracterise par un prix d'ouverture; de fermeture, le volume, etc...
+ *
+ */
 public class TimeSerie {
 	// Champs definissant une TimeSerie
-	private CircularArray<TSDatum> array;
+	private CircularArray<TSPoint> array;
 	private long timeInterval;// en seconde !
 	private long startDate; // en seconde !
 	
 	// Champs pour les calculs
 	long endDatumDate;
-	TSDatum curDatum;
+	TSPoint curDatum;
 	
 	private TimeSerie(int capacity, long startDate,long timeInterval){
-		array= new CircularArray<TSDatum>(TSDatum.class, capacity);
+		array= new CircularArray<TSPoint>(TSPoint.class, capacity);
 		this.timeInterval=timeInterval;
 		this.startDate=startDate;
 		endDatumDate=startDate;
@@ -43,28 +45,29 @@ public class TimeSerie {
 		return array.size();
 	}
 	
-	public TSDatum get(int i){
+	public TSPoint get(int i){
 		return array.get(i);
 	}
 	
 	/**
+	 * Ajouter un echange dans la TimeSerie
 	 * @param t 
 	 * @return Le TSdatum ajoute (null si aucun n'est ajoute)
 	 */
-	public TSDatum feed(Trade t){
+	public TSPoint feed(Trade t){
 		
 		if(startDate<0)
 			startDate=endDatumDate=t.date;
 			
 		
-		TSDatum createdDatum=null;
+		TSPoint createdDatum=null;
 		if( t.date>=endDatumDate ){
 			createdDatum=curDatum;
 			
 			if (createdDatum != null)
 				array.add(curDatum);
 			
-			curDatum=new TSDatum(BigDecimal.ZERO, BigDecimal.ZERO, new Decimal("10000000"),t.price,BigDecimal.ZERO);
+			curDatum=new TSPoint(BigDecimal.ZERO, BigDecimal.ZERO, new Decimal("10000000"),t.price,BigDecimal.ZERO);
 			endDatumDate+=timeInterval;
 			
 		}
@@ -77,7 +80,10 @@ public class TimeSerie {
 
 	}
 	
-	public TSDatum getLast(){
+	/**
+	 * @return Le derniere element
+	 */
+	public TSPoint getLast(){
 		return array.getLast();
 	}
 	

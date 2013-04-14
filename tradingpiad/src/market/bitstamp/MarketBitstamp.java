@@ -28,6 +28,10 @@ import utilities.Decimal;
 import utilities.Op;
 import utilities.Util;
 
+/**
+ * Classe implementant la transformation des donnees json en objets java pour la bourse d'echange Bitstamp.
+ * Elle defini divers information specifiques a cette bourse (precision des prix, frais de transaction)
+ */
 public abstract class MarketBitstamp extends Market {
 
 	private ObjectMapper mapper;

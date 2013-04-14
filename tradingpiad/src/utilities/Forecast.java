@@ -6,6 +6,11 @@ import java.util.ArrayList;
 import forecast.TimeSerie;
 
 
+/**
+ * Permet d'analyser un historique et faire des predictions sur l'evolutiondes prix
+ * Elle fonctionne simplement en comptant le nombre de montee et de descente
+ *
+ */
 public class Forecast {
 
 	private TimeSerie trades_history ; 
@@ -17,12 +22,19 @@ public class Forecast {
 	private int nb_positive = 0 ;
 	
 	
+	/**
+	 * @param tradesHistory L'historique qu'on veut analyser
+	 */
 	public Forecast(TimeSerie tradesHistory){
 		this.trades_history = tradesHistory;
 		rt = new ArrayList<BigDecimal>();
 	}
 	
 	
+	/**
+	 * Calcul de variables intermediaires
+	 * @param window_size Taille de la fenetre ou 'lon regarde dan le passe
+	 */
 	public void calcul_rt( int window_size ){
 		
 	
@@ -67,21 +79,27 @@ public class Forecast {
 	}
 	*/
 	
+	/**
+	 * @return true Si une montee des prix est predite false sinon
+	 */
 	public boolean is_forecast_positif(){
 		
 		System.out.println("is_forecast_positif"+(double)((double)nb_positive/(double)limit_number));
 		
-		if((double)((double)nb_positive/(double)limit_number)>0.2 ){
+		if((double)((double)nb_positive/(double)limit_number)>0.8 ){
 			return true ;
 		}
 		return false ; 
 	}
 
+	/**
+	 * @return true Si une descente des prix est predite, false sinon
+	 */
 	public boolean is_forecast_negatif(){
 		
 		System.out.println("is_forecast-negatif"+(double)((double)nb_positive/(double)limit_number));
 		
-		if((double)((double)nb_negatif/(double)limit_number)>0.6 ){
+		if((double)((double)nb_negatif/(double)limit_number)>0.8 ){
 			return true ;
 		}
 		return false ; 

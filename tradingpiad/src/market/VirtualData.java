@@ -12,22 +12,20 @@ import utilities.LinkedList;
 import utilities.Op;
 
 
+/**
+ * Classe representant les donnees virtuelles lorsqu'on fait une simulation
+ *
+ */
 public class VirtualData {
 	
-	private Wallet wallet;
-	protected Market market;
-	
-	 
-	
-	//1st impelementation
-	//private List<Order> asks = new ArrayList<Order>();
-	//private List<Order> bids = new ArrayList<Order>();
+	private Wallet wallet; // Le portefeuille associe au marche.
+	protected Market market; // Le marche concerne par ces donnes virtuelles
 
-	//Here i'm simply testing a new approach 
-	private LinkedList<Order> linked_asks = new LinkedList<Order>(new CompareAsk());
-	private LinkedList<Order> linked_bids = new LinkedList<Order>(new CompareBid());
+	private LinkedList<Order> linked_asks = new LinkedList<Order>(new CompareAsk()); // La liste des ASK virtuels de l'agent trader
+	private LinkedList<Order> linked_bids = new LinkedList<Order>(new CompareBid()); // La liste des BID virtuels de l'agent trader
 	
-	public LinkedList<Order> hist_bids = new LinkedList<Order>(new CompareBid());
+	public LinkedList<Order> hist_bids = new LinkedList<Order>(new CompareBid()); // l'historique des BID executes
+	
 	//private LinkedList<Order> hist_asks = new LinkedList<Order>(new CompareBid());
 
 	
@@ -37,50 +35,78 @@ public class VirtualData {
 		this.market=market;
 	}
 
+	
+	
+	/**
+	 * 
+	 * Ajouter un ordre dans le cahier des ordres virtuel
+	 * @param o Un ordre de type BID
+	 */
 	public void addBid(Order o){
 		Assert.nullCheck(o);
 		Assert.checkPrecond(!o.trade_type.equals(Type.ASK), "Wrong trade type, should be BID");
+		
+		//Arrondis  selon la precision du marche
 		o.price=market.roundPrice(o.price);
 		o.amount=market.roundAmount(o.amount);
+		
+		// On retire du wallet l'argent mise dans le marche
 		BigDecimal x=Op.mult(o.price, o.amount);
 		wallet.setAmount(market.cur2, Op.neg(x));
+		
 		linked_bids.insert(o);
-		//bids.add(o);
-		//Collections.sort(bids);
 	}
 	
+	/**
+	 *  Ajouter un ordre dans le cahier des ordres virtuel
+	 * @param o Un ordre de type ASK
+	 */
 	public void addAsk(Order o){
 		Assert.nullCheck(o);
 		Assert.checkPrecond(!o.trade_type.equals(Type.BID), "Wrong trade type, should be ASK");
+		
+		//Arrondis  selon la precision du marche
 		o.price=market.roundPrice(o.price);
 		o.amount=market.roundAmount(o.amount);
+		
+		// On retire du wallet l'argent mise dans le marche
 		wallet.setAmount(market.cur1, Op.neg(o.amount));
+		
 		linked_asks.insert(o);
-		//asks.add(o);		
-		//Collections.sort(asks) ;
 	}
 	
-	//public List<Order> getAsks(){return asks;}
-	//public List<Order> getBids(){return bids;}
-	
+	/**
+	 * @return La liste des asks
+	 */
 	public LinkedList<Order> getOpenAsks() { return linked_asks ; }
+	
+	/**
+	 * @return La liste des bids
+	 */
 	public LinkedList<Order> getOpenBids() { return linked_bids ; }
 	
 
 	
+	/**
+	 * Supprimer un ordre
+	 * @param item L'item contenant l'ordre a supprimmer
+	 */
 	public void cancelOrder(Item<Order> item){
 		if (item.e.trade_type == Type.ASK){
 			linked_asks.delete(item);
-			wallet.setAmount(market.cur1, item.e.amount);
+			wallet.setAmount(market.cur1, item.e.amount);// on recupere l'argent investi dans l'ordre dans le wallet
 		}
 		
 		if(item.e.trade_type == Type.BID){
 			linked_bids.delete(item);
 			BigDecimal x=Op.mult(item.e.amount,item.e.price);
-			wallet.setAmount(market.cur2, x);
+			wallet.setAmount(market.cur2, x);// on recupere l'argent investi dans l'ordre dans le wallet
 		}		
 	}
 	
+	/**
+	 * @return La quantite de cur1 investi dans le marche
+	 */
 	public BigDecimal getInMarketCur1(){
 		BigDecimal cur1Amount=Decimal.ZERO;
 		for(Item<Order> item:this.getOpenAsks()){
@@ -89,6 +115,9 @@ public class VirtualData {
 		return cur1Amount;
 	}
 	
+	/**
+	 * @return La quantite de cur2 investsi dans le marche
+	 */
 	public BigDecimal getInMarketCur2(){
 		BigDecimal cur2Amount=Decimal.ZERO;
 		for(Item<Order> item:this.getOpenBids()){
@@ -98,11 +127,18 @@ public class VirtualData {
 	}
 	
 	
+	/**
+	 * @return Le portefeuille lie qu 
+	 */
 	public Wallet getWallet(){
 		return wallet;
 		
 	}
 	
+	/**
+	 * Verifie les derniers echanges non verifies, les compare avec les ordres virtuels de l'agent trader et aisni determine si ils auraient pu être executés ou non.
+	 * Si c'est le cas , cela remplit le wallet avec l'argent gagnee correspondante et retire l'ordre execute des donnees virtuelles
+	 */
 	public void checkNewTrades() {	
 		Assert.nullCheck(market.last_trades, market.trades);
 		final LinkedList<Order> pendingAsks = this.getOpenAsks();
@@ -112,16 +148,19 @@ public class VirtualData {
 
 		Trade current; // Echange en cours de traitement
 		Comparator<AbstractOrder> comp;// Comparateur correspondant 
-		LinkedList<Order> pending; 
-		Item<Order> best_item;
+		LinkedList<Order> pending;
+		Item<Order> best_item; 
 		Order best;
 		BigDecimal amount_executed;
 		BigDecimal current_amount;
+		
 		Currency cur;
-		for (int i = 0; i < market.last_trades.length; i++) {
+		for (int i = 0; i < market.last_trades.length; i++) { // pour chaque echange recent non encore verifie
 			current = market.last_trades[i];
 			System.out.println("aj"+current);
 			current_amount = current.amount;
+			
+			// Selon si l'echnage courant est un bid ou un ask on choisit des avriabels differentes (après le traitement est quasi similaire à ces variables pres)
 			if (current.trade_type.equals(Type.ASK)) {
 				comp = compAsk;
 				pending = pendingAsks;
@@ -133,26 +172,35 @@ public class VirtualData {
 			}
 			
 			try {
-				best_item = pending.getFirst();
-				best = best_item.e;
+				best_item = pending.getFirst(); 
+				best = best_item.e; // On recupere l'ordre  virtuel le plus competitif
 
+				
+				// tant que il y a un ordre virtuel plus competitif que celui execute en vrai et que la quantite de l'echange courant ne vaut pas 0
 				while (comp.compare(best, current) <= 0 && current_amount.compareTo(market.getAmountPrecision())>0) {
-					amount_executed = (best.amount.compareTo(current_amount)<0) ? best.amount
-							: current_amount;
-					current_amount = Op.sub(current_amount,amount_executed);
+					
+					// Calcul de la qauntite a execute
+					amount_executed = (best.amount.compareTo(current_amount)<0) ? best.amount: current_amount;
+					
+					// On vide l'echange courant de cette quantite (sur une copie, l'historique reste intact)
+					current_amount = Op.sub(current_amount,amount_executed); 
+					
+					// On vide le meilleur ordre virtuel partiellement
 					best.amount =Op.sub(best.amount,amount_executed);
 					
+					// On remplit l'historique des bids executes
 					if(pending == pendingBids){
-						Order executed_order= new Order(best.price,amount_executed,Type.BID);
+						Order executed_order= new Order(best.price, market.roundAmount(market.subFee(amount_executed)),Type.BID);
 						hist_bids.insert(executed_order);
 					}
 					
+					// On remplit le wallet avec la quantite gagne a l'execution
 					if (current.trade_type.equals(Type.ASK))
-						wallet.setAmount(cur, Op.mult(amount_executed,best.price));
+						wallet.setAmount(cur,market.roundPrice(market.subFee( Op.mult(amount_executed,best.price))));
 					else
-						wallet.setAmount(cur, amount_executed);
+						wallet.setAmount(cur, market.roundAmount(market.subFee( amount_executed)));
 					
-					
+					// Si le meilleur ordre virtuel est totalement vide, on le retire
 					if (best.amount.compareTo(market.getAmountPrecision())<=0) {
 						pending.delete(best_item);
 						best_item = pending.getFirst();
@@ -163,8 +211,8 @@ public class VirtualData {
 			} catch (NoSuchElementException e) {
 				// Rien a faire, juste passer ï¿½ l'echange suivant
 			}
-			market.trades.add(current);
-			market.getTs().feed(current);
+			market.trades.add(current); // On fait passer l'echange courant à l'historique deja verifiee
+			market.getTs().feed(current);// On remplis la time serie de l'evolution du marche
 		}
 	}
 

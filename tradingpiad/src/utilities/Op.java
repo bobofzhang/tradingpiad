@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+/**
+ * Classe utilitaire faisant des opérations sur des BigDecimal de maniere a rendre le MathContext implicite
+ *
+ */
 public class Op {
 
 	static MathContext mc = new MathContext(64, RoundingMode.HALF_UP);

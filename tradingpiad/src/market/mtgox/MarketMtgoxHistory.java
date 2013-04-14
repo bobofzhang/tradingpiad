@@ -11,6 +11,11 @@ import market.Wallet;
 import utilities.Item;
 import utilities.LinkedList;
 
+
+/**
+ * Classe permettant de faire uen simulation sur des donnes historiques completes (cahier des ordres et historique)
+ *
+ */
 public class MarketMtgoxHistory extends MarketMtgox{
 
 	private HistoryData histData;
