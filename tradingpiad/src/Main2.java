@@ -46,7 +46,6 @@ import market.btce.MarketBtceVirtual;
 import market.mtgox.MarketMtgoxHistory;
 import market.mtgox.MarketMtgoxVirtual;
 
-
 public class Main2 {
 	public static void main(String[] args) throws ExchangeError, NoSuchAlgorithmException, KeyManagementException, IOException {
 		
