@@ -14,6 +14,7 @@ import utilities.Op;
 
 /**
  * http://en.wikipedia.org/wiki/MACD
+ * (pas utilisee dans une strategie je l'ai fait juste pour tester des trucs)
  */
 public class MACD implements Indicator {
 	private EMA ema1;

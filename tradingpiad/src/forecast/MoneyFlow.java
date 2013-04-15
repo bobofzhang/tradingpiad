@@ -12,6 +12,7 @@ import utilities.CircularArray;
 import utilities.Decimal;
 import utilities.Op;
 
+/**(pas utilisee dans une strategie je l'ai fait juste pour tester des trucs)*/
 public class MoneyFlow implements Indicator{
 	
 	private CircularArray<BigDecimal> arr;

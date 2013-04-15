@@ -39,9 +39,13 @@ public abstract class MarketMtgox extends Market {
 	private Decimal fee_percent;
 
 	public MarketMtgox(Currency cur1, Currency cur2) throws ExchangeError {
-		super(cur1, cur2,"mtgox");
+		super(cur1, cur2, "mtgox");
 		fee_percent = new Decimal(0.006);
-		mapper=MarketMtgox.produceMapper(cur1, cur2);
+		mapper = MarketMtgox.produceMapper();
+
+		// Verification si la pair <cur1, cur2> est accepte par l'exchange
+		Assert.checkPrecond(cur1.equals(Currency.BTC), "Mtgox n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
+		Assert.checkPrecond(Arrays.asList(currency_list).contains(cur2), "Mtgox n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
 	}
 
 	@Override
@@ -113,7 +117,12 @@ public abstract class MarketMtgox extends Market {
 		return amount.setScale(8, RoundingMode.FLOOR);
 	}
 
-	public static ObjectMapper produceMapper(Currency cur1, Currency cur2) {
+	/**
+	 * @param cur1 La premiere monnaie
+	 * @param cur2 La seconde monnaie
+	 * @return
+	 */
+	public static ObjectMapper produceMapper() {
 
 		// JSON mapper inialisation
 		ObjectMapper mapper = new ObjectMapper();
@@ -133,9 +142,7 @@ public abstract class MarketMtgox extends Market {
 		testModule.addDeserializer(Type.class, new TypeDeserializer(true));// Inversed = true (pour l'instant si mtgox change pas encore..)
 		mapper.registerModule(testModule);
 
-		// Verification si la pair <cur1, cur2> est accepte par l'exchange
-		Assert.checkPrecond(cur1.equals(Currency.BTC), "Mtgox n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
-		Assert.checkPrecond(Arrays.asList(currency_list).contains(cur2), "Mtgox n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
+		
 
 		return mapper;
 	}

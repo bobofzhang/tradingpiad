@@ -10,7 +10,7 @@ import utilities.Assert;
 
 /**
  * Classe utilisee lors de d'une simulation à partir de donnees historiques completes (json ticker+depth +trades)
- * Les implementations de Market:  MarketMtgoxHistory, MarketBtceHistory et MarketBitstamp History utilisent cette classe (cette classe est la surout pour ne pas refaire 3 fois)
+ * Les implementations de Market:  MarketMtgoxHistory, MarketBtceHistory et MarketBitstamp History utilisent cette classe (cette classe est la surtout pour ne pas refaire 3 fois la meme chose)
  */
 public class HistoryData extends VirtualData {
 	private String filename; // Le fichier  ou sont enrregistrees les donnees du marche

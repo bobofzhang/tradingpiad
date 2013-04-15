@@ -21,7 +21,7 @@ import utilities.Op;
  * 
  * Si le prix monte on achete, s'il descend vont descendre on vend
  * 
- * A la fin on vend quand meme pour finir avec que de l'argent (plus de bitcoins)
+ * A la fin on vend quand meme pour finir avec que de l'argent (et plus aucun de bitcoins)
  *
  */
 public class ForecastStrategy implements Strategy{

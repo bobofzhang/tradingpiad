@@ -8,7 +8,7 @@ import utilities.Op;
  * 
  * @author Kevin
  *
- * Implementation de la moyenne mobile exponentielle (voir http://en.wikipedia.org/wiki/Moving_average)
+ * Implementation de la moyenne mobile exponentielle (voir http://en.wikipedia.org/wiki/Moving_average) (pas utilisee dans une strategie je l'ai fait juste pour tester des trucs)
  */
 public class EMA {
 	private final BigDecimal alpha; // Coefficient de lissage

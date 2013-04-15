@@ -62,7 +62,7 @@ public abstract class MarketBtceLive extends MarketBtce {
 	@Override
 	public void waitTimeDelta() throws EndOfRun{
 		try {
-			Thread.sleep(timeDelta);
+			Thread.sleep(timeDelta);// Si on prends les donnees en live, on doit vraimennt attendre
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			System.exit(0);

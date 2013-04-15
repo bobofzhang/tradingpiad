@@ -14,16 +14,17 @@ import utilities.Item;
 import utilities.Op;
 
 /**
+ *
  * Strategie d'achat-vente si le spread est gros. (Ce qu'on avait compris du market making)
  * La strategie est de surveiller le spread et si celui ci est suffisamment gros on place une demande pour faire une offre juste apres en placant des ordres les plus competitifs possibles
  * Cette strategie utilise l'historique des ordres virtuels executes et revend uniquement si c'est rentable,
  * Neanmoins les bitcoins restant a la fin sont vendus
  *
  */
-public class MarketMaking implements Strategy {
+public class AchatVente implements Strategy {
 	private BigDecimal maxbtc; // Nombre max de bitcoin qu'on veut avoir en possession
 
-	public MarketMaking() {
+	public AchatVente() {
 	}
 
 	@Override

@@ -26,7 +26,7 @@ import strategies.Agent;
 import strategies.Strategy;
 import strategies.StrategyObserver;
 import strategies.marketmaking.ForecastStrategy;
-import strategies.marketmaking.MarketMaking;
+import strategies.marketmaking.AchatVente;
 import strategies.marketmaking.ProfitMarketMaking;
 import utilities.CircularArray;
 import utilities.Decimal;
@@ -65,12 +65,10 @@ public class Main2 {
             public void checkServerTrusted(X509Certificate[] certs, String authType) {
             }
         };
-        
 
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, new TrustManager[] { trm }, null);
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        
         
         System.setProperty("http.agent", "");
 		
@@ -231,7 +229,7 @@ public class Main2 {
 		
 		
 		//Strategy mmaking= new ProfitMarketMaking(m, new Decimal("0.0"), 3600, new Decimal("0.1"));
-		Strategy mmaking= new MarketMaking();
+		Strategy mmaking= new AchatVente();
 		//Strategy mmaking = new ForecastStrategy(new Decimal("100"));
 		Agent a=new Agent(mmaking,m,wal);
 		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);

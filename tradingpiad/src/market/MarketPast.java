@@ -305,7 +305,7 @@ public class MarketPast extends Market{
 			String last_tid = String.valueOf((start-1800000)*1000);// Tid de mtgox en millionieme de seconde !
 			long last_time = start; // Tid de mtgox en millionieme de seconde !
 
-			ObjectMapper mapper = MarketMtgox.produceMapper(Currency.BTC, cur);
+			ObjectMapper mapper = MarketMtgox.produceMapper();
 			while (last_time < end) {
 				URL url = new URL("http://data.mtgox.com/api/0/data/getTrades.php?Currency=" + cur + "&since=" + last_tid);
 				try {

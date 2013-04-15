@@ -12,7 +12,8 @@ import utilities.Item;
 import utilities.LinkedList;
 
 /**
- * Classe permettant de faire uen simulation sur des donnes historiques completes (cahier des ordres et historique)
+ * Classe permettant de faire une simulation sur des donnees historiques completes (cahier des ordres et historique)
+ * En faite, elle ne fait qu'utiliser la classe HistoryData.
  *
  */
 public class MarketBitstampHistory extends MarketBitstamp {
