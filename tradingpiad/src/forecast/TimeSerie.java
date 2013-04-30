@@ -12,13 +12,15 @@ import com.xeiam.xchart.StyleManager.ChartType;
 import com.xeiam.xchart.StyleManager.LegendPosition;
 
 import market.Trade;
+import utilities.Assert;
 import utilities.CircularArray;
 import utilities.Decimal;
 import utilities.Op;
 
 /**
  * Classe representant une serie temporelle financiere(comme celle qu'on peut voir sur https://mtgox.com/ )
- * Chaque point de la serie est caracterise par un prix d'ouverture; de fermeture, le volume, etc...
+ * Chaque point de la serie est caracterise par: un prix d'ouverture, de fermeture, le volume, le prix le plus bas
+ * et le prix le plus haut. Un point matérialise les informations durant une periode fixe (sur  https://mtgox.com/ c'est une heure par exemple).
  *
  */
 public class TimeSerie {
@@ -28,15 +30,16 @@ public class TimeSerie {
 	private long startDate; // en seconde !
 	
 	// Champs pour les calculs
-	long endDatumDate;
-	TSPoint curDatum;
+	long endPointDate;
+	TSPoint curPoint;
 	
 	private TimeSerie(int capacity, long startDate,long timeInterval){
 		array= new CircularArray<TSPoint>(TSPoint.class, capacity);
 		this.timeInterval=timeInterval;
 		this.startDate=startDate;
-		endDatumDate=startDate;
+		endPointDate=startDate;
 	}
+	
 	public TimeSerie(int capacity, long timeInterval){
 		this(capacity, -1,timeInterval);
 	}
@@ -52,31 +55,32 @@ public class TimeSerie {
 	/**
 	 * Ajouter un echange dans la TimeSerie
 	 * @param t 
-	 * @return Le TSdatum ajoute (null si aucun n'est ajoute)
+	 * @return Le TSPoint ajoute (null si aucun n'est ajoute)
 	 */
 	public TSPoint feed(Trade t){
 		
 		if(startDate<0)
-			startDate=endDatumDate=t.date;
+			startDate=endPointDate=t.date;
 			
+		Assert.checkPrecond(t.date>= startDate, "L'echange doit etre date apres la date de de debut de la time serie");
 		
-		TSPoint createdDatum=null;
-		if( t.date>=endDatumDate ){
-			createdDatum=curDatum;
+		TSPoint createdPoint=null;
+		while( t.date>=endPointDate ){
+			createdPoint=curPoint;
 			
-			if (createdDatum != null)
-				array.add(curDatum);
+			if (createdPoint != null) // Si on est pas au debut ou il n'y a aps encore de point courant
+				array.add(curPoint);
 			
-			curDatum=new TSPoint(BigDecimal.ZERO, BigDecimal.ZERO, new Decimal("10000000"),t.price,BigDecimal.ZERO);
-			endDatumDate+=timeInterval;
+			curPoint=new TSPoint(BigDecimal.ZERO, BigDecimal.ZERO, new Decimal(Double.POSITIVE_INFINITY),t.price,BigDecimal.ZERO);
+			endPointDate+=timeInterval;
 			
 		}
 		
-		curDatum.volume=Op.add(curDatum.volume, t.amount);
-		curDatum.high=Op.max(curDatum.high, t.price);
-		curDatum.low=Op.min(curDatum.low, t.price);
-		curDatum.close=t.price;
-		return createdDatum;
+		curPoint.volume=Op.add(curPoint.volume, t.amount);
+		curPoint.high=Op.max(curPoint.high, t.price);
+		curPoint.low=Op.min(curPoint.low, t.price);
+		curPoint.close=t.price;
+		return createdPoint;
 
 	}
 	

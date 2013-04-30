@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Scanner;
 
+import market.Currency;
 import market.ExchangeError;
+import market.Market;
 import market.Trade;
 import market.Trades;
 
@@ -89,5 +92,17 @@ public class Util {
 	public static String convertStreamToString(InputStream is) {
 	    Scanner s = new java.util.Scanner(is,"UTF-8").useDelimiter("\\A");
 	    return s.hasNext() ? s.next() : "";
+	}
+	
+	public static ArrayList<Currency> getCurrencyList(Market[] markets){
+		// Get the list of all the currency used by the trader agent
+				ArrayList<Currency> listCurrencies = new ArrayList<Currency>(markets.length * 2);
+				for (Market m : markets) {
+					if (!listCurrencies.contains(m.cur1))
+						listCurrencies.add(m.cur1);
+					if (!listCurrencies.contains(m.cur2))
+						listCurrencies.add(m.cur2);
+				}
+				return listCurrencies;
 	}
 }

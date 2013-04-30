@@ -39,7 +39,7 @@ public class Wallet {
 	 */
 	public void setAmount(Currency c, BigDecimal amount){
 		BigDecimal new_amount=Op.add(wallet[c.ordinal()],amount);
-		Assert.checkPrecond(new_amount.compareTo(BigDecimal.ZERO)>=0,"Forbidden action: Not enough "+c+" in the wallet");
+		Assert.checkPrecond(new_amount.compareTo(BigDecimal.ZERO)>=0,"Action interdite: Pas suffisamment de "+c+" dans le portefeuille");
 		wallet[c.ordinal()]=new_amount;
 		
 	}

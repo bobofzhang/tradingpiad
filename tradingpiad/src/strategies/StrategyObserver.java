@@ -15,6 +15,7 @@ import com.xeiam.xchart.StyleManager.LegendPosition;
 
 import utilities.Decimal;
 import utilities.Op;
+import utilities.Util;
 
 import market.Currency;
 import market.Market;
@@ -53,13 +54,7 @@ public class StrategyObserver implements MyObserver {
 		Wallet w = a.getWallet();
 
 		// Get the list of all the currency used by the trader agent
-		ArrayList<Currency> listCurrencies = new ArrayList<Currency>(markets.length * 2);
-		for (Market m : markets) {
-			if (!listCurrencies.contains(m.cur1))
-				listCurrencies.add(m.cur1);
-			if (!listCurrencies.contains(m.cur2))
-				listCurrencies.add(m.cur2);
-		}
+		ArrayList<Currency> listCurrencies = Util.getCurrencyList(markets);
 
 		// Create a corresponding array wich mapping a currency to an amount
 		BigDecimal[] tab = new BigDecimal[listCurrencies.size()];

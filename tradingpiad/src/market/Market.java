@@ -19,7 +19,13 @@ import utilities.Op;
 /**
  * Un objet Market est caracterise par un triplet (monnaie 1, monnaie 2, bourse d'echange,).
  * Il donne accès  aux informations du marché et permet d'interagir avec lui.
- * C'est en quelque sorte une interface entre l'agent trader et l'environnement de trading
+ * C'est en quelque sorte une interface entre l'agent trader et l'environnement de trading.
+ * C'est un objet abstrait dont l'implementation change selon:
+ * - que les interractions sont virtuelles ou réelles (version reelle pas implemente mais possible)
+ * (pas encore implementee mais possible en derivant les classes MarketMtgoxLive pour mtgox,
+ * marketBtceLive pour btce, etc...).
+ * - la bourse d'echange
+ * - dans le cas virtuelle: si la simulation tourne en live ou si elle tourne sur un fichier
  */
 public abstract class Market extends Observable{
 	public Currency cur1;
