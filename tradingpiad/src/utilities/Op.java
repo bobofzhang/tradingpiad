@@ -13,19 +13,19 @@ public class Op {
 	static MathContext mc = new MathContext(64, RoundingMode.HALF_UP);
 
 	public static BigDecimal add(BigDecimal a, BigDecimal b) {
-		return a.add(b, mc);
+		return a.add(b, mc).stripTrailingZeros();
 	}
 
 	public static BigDecimal sub(BigDecimal a, BigDecimal b) {
-		return a.subtract(b, mc);
+		return a.subtract(b, mc).stripTrailingZeros();
 	}
 
 	public static BigDecimal mult(BigDecimal a, BigDecimal b) {
-		return a.multiply(b, mc);
+		return a.multiply(b, mc).stripTrailingZeros();
 	}
 
 	public static BigDecimal div(BigDecimal a, BigDecimal b) {
-		return a.divide(b, mc);
+		return a.divide(b, mc).stripTrailingZeros();
 	}
 
 	public static BigDecimal abs(BigDecimal a) {

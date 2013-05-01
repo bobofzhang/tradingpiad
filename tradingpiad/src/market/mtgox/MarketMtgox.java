@@ -40,7 +40,7 @@ public abstract class MarketMtgox extends Market {
 
 	public MarketMtgox(Currency cur1, Currency cur2) throws ExchangeError {
 		super(cur1, cur2, "mtgox");
-		fee_percent = new Decimal(0.006);
+		fee_percent = new Decimal("0.006");
 		mapper = MarketMtgox.produceMapper();
 
 		// Verification si la pair <cur1, cur2> est accepte par l'exchange

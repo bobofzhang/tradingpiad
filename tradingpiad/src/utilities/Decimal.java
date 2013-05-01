@@ -15,6 +15,12 @@ public class Decimal extends BigDecimal {
 	public Decimal(String val) {
 		super(val,Op.mc);
 	}
+	public int compareTo(BigDecimal val){
+		if (val instanceof PosInf){
+			return -1;
+		}
+		return super.compareTo(val);
+	}
 	
 
 }

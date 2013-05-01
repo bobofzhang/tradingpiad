@@ -284,13 +284,14 @@ public abstract class Market extends Observable{
 	public BigDecimal getTotalCur2Amount(){
 		return Op.add(this.getInMarketCur2(),getWallet().getAmount(cur2));
 	}
+	
 	/**
-	 * Analyse els echange recents non analyser (fera rien dans le cas reel)
+	 * Analyse les echange recents non analyses (fera rien dans le cas reel)
 	 */
 	public abstract void check();
 	
 	/**
-	 * Methode pour arrondir les prix. La maniere d'arrondir un pris avrie selon les bourses d'echanges (selon le nombre de chiffre apprès la virgule autorise)
+	 * Methode pour arrondir les prix. La maniere d'arrondir un pris varie selon les bourses d'echanges (selon le nombre de chiffres apprès la virgule autorise)
 	 * @param price Un prix qu'on veut arrondir
 	 * @return Un arrondi du prix selon la precision des prix de ce marche (peut varier d'un marche a l'autre)
 	 */
@@ -317,21 +318,21 @@ public abstract class Market extends Observable{
 	
 	/**
 	 * @param amount Une quantite d'une currency quelconque
-	 * @return Cette quntite moins les frais de transaction (si par exemple on a gagner cette qauntite
+	 * @return Cette quantite moins les frais de transaction
 	 */
 	public abstract BigDecimal subFee(BigDecimal amount);
 	
 	/**
 	 * @param ask Le prix ou on vend
 	 * @param bid Le prix ou on achete
-	 * @return Le profit si on achete a prix bid et on revnd au pirx ask
+	 * @return Le profit si on achete a prix bid et on revend au prix ask
 	 */
 	public BigDecimal getProfit(BigDecimal ask, BigDecimal bid){
 		return Op.sub(subFee(subFee(ask)),bid);
 	}
 
 	/**
-	 * @return Le nomd e la boruse d'echange (par exemple Mtgox)
+	 * @return Le nom de la bourse d'echange (par exemple Mtgox)
 	 */
 	public String getExchangeName(){
 		return exchangeName;

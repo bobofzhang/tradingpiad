@@ -1,4 +1,4 @@
-package testunitaire;
+package test;
 
 import static org.junit.Assert.*;
 
@@ -14,6 +14,7 @@ import forecast.TimeSerie;
 import utilities.CircularArray;
 import utilities.Decimal;
 import utilities.Op;
+import utilities.PosInf;
 
 import arbitrage.BestMatchingDeals;
 import market.Currency;
@@ -22,6 +23,7 @@ import market.Trade;
 import market.Type;
 import market.VirtualData;
 import market.Wallet;
+
 
 public class TestBasicDataStruct {
 	
@@ -81,7 +83,7 @@ public class TestBasicDataStruct {
 		
 		assertEquals("Erreur : d3=new Double (3.0) devrait etre le dernier element",c.get(2),c.getLast());
 		
-		c.add(d3);
+		c.add(d4);
 		assertEquals("Erreur : la taille devrait etre 3",c.size(),3);
 		
 		assertEquals("Erreur le premier element devrait etre d2=new Double (2.0)",c.get(0),d2);
@@ -115,31 +117,31 @@ public class TestBasicDataStruct {
 		assertEquals("La ts devrait etre de taille 1", ts.size(), 1);
 		assertNotNull("Un point devrait etre cree", newPoint);
 		
-		assertEquals("La volume devrait etre 3",newPoint.getVolume().equals(new Decimal("3")));
-		assertEquals("Le low devrait etre 10",newPoint.getLow().equals(new Decimal("10")));
-		assertEquals("Le high devrait etre 20",newPoint.getHigh().equals(new Decimal("20")));
-		assertEquals("Le close devrait etre 20",newPoint.getClose().equals(new Decimal("20")));
-		assertEquals("Le open devrait etre 20",newPoint.getOpen().equals(new Decimal("10")));
+		assertEquals("La volume devrait etre 3",new Decimal("3"),newPoint.getVolume());
+		assertEquals("Le low devrait etre 10",new Decimal("10"),newPoint.getLow());
+		assertEquals("Le high devrait etre 20",new Decimal("20"),newPoint.getHigh());
+		assertEquals("Le close devrait etre 20",new Decimal("20"),newPoint.getClose());
+		assertEquals("Le open devrait etre 20",new Decimal("10"),newPoint.getOpen());
 		
 		newPoint=ts.feed(new Trade(520, new Decimal("13.5"),new Decimal("4.75"), "id"+(i++),t));
 		assertEquals("La ts devrait etre de taille 2", ts.size(), 2);
 		assertNotNull("Un point devrait etre cree", newPoint);
 		
-		assertEquals("La volume devrait etre 0.25",newPoint.getVolume().equals(new Decimal("0.25")));
-		assertEquals("Le low devrait etre 15.5",newPoint.getLow().equals(new Decimal("15.5")));
-		assertEquals("Le high devrait etre 15.5",newPoint.getHigh().equals(new Decimal("15.5")));
-		assertEquals("Le close devrait etre 15.5",newPoint.getClose().equals(new Decimal("15.5")));
-		assertEquals("Le open devrait etre 15.5",newPoint.getOpen().equals(new Decimal("15.5")));
+		assertEquals("La volume devrait etre 0.25",new Decimal("0.25"),newPoint.getVolume());
+		assertEquals("Le low devrait etre 15.5",new Decimal("15.5"),newPoint.getLow());
+		assertEquals("Le high devrait etre 15.5",new Decimal("15.5"),newPoint.getHigh());
+		assertEquals("Le close devrait etre 15.5",new Decimal("15.5"),newPoint.getClose());
+		assertEquals("Le open devrait etre 15.5",new Decimal("15.5"),newPoint.getOpen());
 		
 		newPoint=ts.feed(new Trade(550, new Decimal("10"),new Decimal("1"), "id"+(i++),t));
-		assertEquals("La ts devrait etre de taille 5", ts.size(), 5);
+		assertEquals("La ts devrait etre de taille 5", 5, ts.size());
 		assertNotNull("Un point devrait etre cree", newPoint);
 		
-		assertEquals("La volume devrait etre 0",newPoint.getVolume().equals(new Decimal("0")));
-		assertEquals("Le low devrait etre +Infini",newPoint.getLow().equals(new Decimal(Double.POSITIVE_INFINITY)));
-		assertEquals("Le high devrait etre 0",newPoint.getHigh().equals(new Decimal("0")));
-		assertEquals("Le close devrait etre 0",newPoint.getClose().equals(new Decimal("0")));
-		assertEquals("Le open devrait etre 0",newPoint.getOpen().equals(new Decimal("0")));
+		assertEquals("La volume devrait etre 0",new Decimal("0"),newPoint.getVolume());
+		assertEquals("Le low devrait etre +Infini",new PosInf(),newPoint.getLow());
+		assertEquals("Le high devrait etre 0",new Decimal("0"),newPoint.getHigh());
+		assertEquals("Le close devrait etre 0",new Decimal("0"),newPoint.getClose());
+		assertEquals("Le open devrait etre 0",new Decimal("0"),newPoint.getOpen());
 		
 	}
 }

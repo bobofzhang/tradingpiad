@@ -67,7 +67,7 @@ public abstract class MarketBtce extends Market {
 					f = mapper.readValue(is, Fee.class);
 					Assert.checkPrecond(f.error == null, "BTC-E n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
 					// On set les frais de transaction maintenant qu'on est sur que Btc-e autorise la paire <cur1,cur2> 
-					fee_percent = f.trade.multiply(new Decimal(0.01));
+					fee_percent = f.trade.multiply(new Decimal("0.01"));
 				} catch (JsonParseException e) {
 					e.printStackTrace();
 					throw new ExchangeError("JsonParseException: Erreur jackson");

@@ -215,10 +215,11 @@ public class Main2 {
 		
 		
 		
-		runStratPast("mtgox01082012_15082012.txt");
+		//runStratPast("mtgox01082012_15082012.txt");
 		//runStratPast("mtgox10042013_13042013.txt");
         
 		//runStrat();
+		
 	}
 	
 	public static void runStratPast(String filename) throws ExchangeError{

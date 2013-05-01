@@ -16,6 +16,7 @@ import utilities.Assert;
 import utilities.CircularArray;
 import utilities.Decimal;
 import utilities.Op;
+import utilities.PosInf;
 
 /**
  * Classe representant une serie temporelle financiere(comme celle qu'on peut voir sur https://mtgox.com/ )
@@ -71,7 +72,7 @@ public class TimeSerie {
 			if (createdPoint != null) // Si on est pas au debut ou il n'y a aps encore de point courant
 				array.add(curPoint);
 			
-			curPoint=new TSPoint(BigDecimal.ZERO, BigDecimal.ZERO, new Decimal(Double.POSITIVE_INFINITY),t.price,BigDecimal.ZERO);
+			curPoint=new TSPoint(Decimal.ZERO, Decimal.ZERO, new PosInf(),Decimal.ZERO,Decimal.ZERO);
 			endPointDate+=timeInterval;
 			
 		}
@@ -80,6 +81,8 @@ public class TimeSerie {
 		curPoint.high=Op.max(curPoint.high, t.price);
 		curPoint.low=Op.min(curPoint.low, t.price);
 		curPoint.close=t.price;
+		if(curPoint.open.equals(Decimal.ZERO))
+			curPoint.open=t.price;
 		return createdPoint;
 
 	}
