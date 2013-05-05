@@ -67,7 +67,7 @@ public abstract class MarketBtce extends Market {
 					f = mapper.readValue(is, Fee.class);
 					Assert.checkPrecond(f.error == null, "BTC-E n'autorise pas la pair: <" + cur1.name() + "," + cur2.name() + ">");
 					// On set les frais de transaction maintenant qu'on est sur que Btc-e autorise la paire <cur1,cur2> 
-					fee_percent = f.trade.multiply(new Decimal("0.01"));
+					fee_percent = Op.mult(f.trade,new Decimal("0.01"));
 				} catch (JsonParseException e) {
 					e.printStackTrace();
 					throw new ExchangeError("JsonParseException: Erreur jackson");
@@ -144,7 +144,7 @@ public abstract class MarketBtce extends Market {
 	}
 	
 	public BigDecimal getPricePrecision(){
-		return new BigDecimal ("0.001");
+		return new BigDecimal ("0.00000001");
 	}
 	
 	public BigDecimal getAmountPrecision(){
@@ -152,11 +152,11 @@ public abstract class MarketBtce extends Market {
 	}
 	
 	public BigDecimal roundPrice(BigDecimal price){
-		return price.setScale(3,RoundingMode.FLOOR);
+		return price.setScale(8,RoundingMode.HALF_UP);
 	}
 	
 	public BigDecimal roundAmount(BigDecimal amount){
-		return amount.setScale(8,RoundingMode.FLOOR);
+		return amount.setScale(8,RoundingMode.HALF_UP);
 	}
 
 }

@@ -73,16 +73,20 @@ public abstract class MarketMtgoxLive extends MarketMtgox {
 	}
 	
 	@Override
-	public void waitTimeDelta() throws EndOfRun{
+	public void nextTimeDelta() throws EndOfRun{
+		currentTime = System.currentTimeMillis() ;
+		if(currentTime>= endTime)
+			throw new EndOfRun();
+	}
+	
+	@Override
+	public void sleep(){
 		try {
 			Thread.sleep(timeDelta); // Si on prends les donnees en live, on doit vraimennt attendre
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		currentTime=System.currentTimeMillis();
-		if(currentTime >= endTime)
-			throw new EndOfRun();
 	}
 	
 	@Override

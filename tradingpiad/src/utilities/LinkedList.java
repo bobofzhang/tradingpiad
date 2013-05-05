@@ -75,6 +75,13 @@ public class LinkedList<E> implements Iterable<Item<E>> {
 		else
 			return head.next;
 	}
+	
+	public Item<E> getLast() {
+		if (isEmpty())
+			throw new NoSuchElementException();
+		else
+			return head.previous;
+	}
 
 	public int size() {
 		return size;

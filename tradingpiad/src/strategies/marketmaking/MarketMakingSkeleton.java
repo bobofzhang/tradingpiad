@@ -17,8 +17,8 @@ import strategies.Strategy;
 public abstract class MarketMakingSkeleton implements Strategy{
 
 	@Override
-	public void execute(Market m) throws EndOfRun {
-		
+	public void execute(Market[] marketList) throws EndOfRun {
+		Market m=marketList[0];
 		// Actualisation des informations du marche
 		try {
 			m.updateAll();

@@ -3,6 +3,7 @@ package market;
 import java.math.BigDecimal;
 
 import utilities.Assert;
+import utilities.Decimal;
 import utilities.Op;
 
 
@@ -21,7 +22,7 @@ public class Wallet {
 	public Wallet(){
 		wallet =new BigDecimal [Currency.values().length];
 		for(int i=0; i< wallet.length;i++)
-			wallet[i]=BigDecimal.ZERO;
+			wallet[i]=new Decimal("0");;
 	}
 	
 	
@@ -39,7 +40,7 @@ public class Wallet {
 	 */
 	public void setAmount(Currency c, BigDecimal amount){
 		BigDecimal new_amount=Op.add(wallet[c.ordinal()],amount);
-		Assert.checkPrecond(new_amount.compareTo(BigDecimal.ZERO)>=0,"Action interdite: Pas suffisamment de "+c+" dans le portefeuille");
+		Assert.checkPrecond(new_amount.compareTo(Decimal.ZERO)>=0,"Action interdite: Pas suffisamment de "+c+" dans le portefeuille");
 		wallet[c.ordinal()]=new_amount;
 		
 	}

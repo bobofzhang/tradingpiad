@@ -194,11 +194,18 @@ public abstract class Market extends Observable{
 	 */
 	public abstract void updateTrades() throws ExchangeError;
 	
+	
+	public abstract void nextTimeDelta() throws EndOfRun;
+	public abstract void sleep();
+	
 	/**
 	 * Fait passer le temps de timeDelta millisecondes
-	 * @throws EndOfRun Si a l'issu de l'attente, on a depasser la date de fin du run
+	 * @throws EndOfRun Si a l'issu de l'attente, on est au dela de la date de fin du run
 	 */
-	public abstract void waitTimeDelta() throws EndOfRun;
+	public void waitTimeDelta() throws EndOfRun{
+		nextTimeDelta();
+		sleep();
+	}
 	
 	/**
 	 * @return Date de depart du run en time millis

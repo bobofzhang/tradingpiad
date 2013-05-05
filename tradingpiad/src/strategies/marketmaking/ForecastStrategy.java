@@ -43,7 +43,8 @@ public class ForecastStrategy implements Strategy{
 	
 	
 	@Override
-	public void execute(Market m) throws EndOfRun {	
+	public void execute(Market[] marketList) throws EndOfRun {	
+		Market m=marketList[0];
 		forecast = new Forecast(m.getTs());
 		forecast.calcul_rt(window_size);
 		System.out.println("SIZE OF TS ================> " + m.getTs().size());

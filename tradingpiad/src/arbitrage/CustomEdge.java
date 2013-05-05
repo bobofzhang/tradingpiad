@@ -7,6 +7,7 @@ import market.Order;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import strategies.PriceManager;
 import utilities.Decimal;
 import utilities.Op;
 
@@ -19,6 +20,7 @@ public class CustomEdge extends DefaultWeightedEdge{
 	
 	private Market market;
 	private boolean reversed;
+	private PriceManager priceManager;
 	
 	
 	/**
@@ -28,9 +30,10 @@ public class CustomEdge extends DefaultWeightedEdge{
 	 *        false si l'echange se fait dans le sens (market.cur1->market.cur2)
 	 *        true si l'echange se fait dans le sens (market.cur2 -> market.cur1)
 	 */
-	public CustomEdge(Market market, boolean reversed){
+	public CustomEdge(Market market, boolean reversed, PriceManager priceManager){
 		this.market=market;
 		this.reversed=reversed;
+		this.priceManager=priceManager;
 	}
 
 	protected double getWeight() {
@@ -38,27 +41,55 @@ public class CustomEdge extends DefaultWeightedEdge{
 		if (market ==null)
 			// si paas de marche, l'arrete coute 0
 			return 0.;
-		
-		Order[] bids = market.getDepth().bids;
-		Order[] asks = market.getDepth().asks;
-		
-		if (bids.length > 0 && asks.length > 0) {
-			
-			BigDecimal w;
-			
-			if (reversed) {
-				w = market.roundAmount(Op.div(Decimal.ONE, asks[0].price)); // Si on veut transfromer X cur2 en Y cur1 (et donc Y=X/(prix cur1) et X =1 arbitriarement )
-			} 
-			
-			else {
-				w = bids[0].price; // Si on transformer X cur1 en Y cur2 (et donc Y=X*(prix cur1) et X= 1 arbitrairement )
-			}
-			
-			return -Math.log(market.subFee(w).doubleValue());
+
+		return -Math.log(quantiteApresEchange(Decimal.ONE).doubleValue());
 			// On log le resulte pour rendre les poids des arc additifs et permettre l'utilisation de l'algorithme du plus court chemin
 			// On change el signe pour que l'algo trouve le chemin le plus long(= le plus profitable) au lieu du plus court
 
-		} else
-			return Double.POSITIVE_INFINITY;
+	}
+	private double trueWeight(){
+		if (market ==null)
+			// si paas de marche, l'arrete coute 0
+			return 1;
+
+		return quantiteApresEchange(Decimal.ONE).doubleValue();
+
+	}
+	
+	public String toString (){
+        return "(" + super.getSource() + "-> (poids = " + trueWeight()+  ") -> " + super.getTarget()+ ")";
+	}
+
+	public Market getmarket(){ return market ; }
+	
+	public boolean isReversed(){ return reversed;}
+	
+
+
+	public BigDecimal getSellPrice() {
+		return priceManager.getSellPrice(market);
+	}
+
+	public BigDecimal getBuyPrice() {
+		 return priceManager.getBuyPrice(market);
+	}
+	
+	public BigDecimal quantiteApresEchange(BigDecimal quantiteAvant){
+		if (!reversed)
+			return market.roundPrice(market.subFee(Op.mult(quantiteAvant, priceManager.getSellPrice(market))));
+		else
+			return market.roundAmount(market.subFee(Op.div(quantiteAvant, priceManager.getBuyPrice(market))));
+	}
+	
+	public BigDecimal quantiteAvantEchange(BigDecimal qteApres){
+		
+		BigDecimal qteWithoutFee=Op.div(qteApres, market.subFee(Decimal.ONE));
+		
+		if (!reversed){
+			return market.roundAmount(Op.div(qteWithoutFee, priceManager.getSellPrice(market)));
+		}
+		else{
+			return market.roundPrice(Op.mult(qteWithoutFee, priceManager.getBuyPrice(market)));
+		}
 	}
 }

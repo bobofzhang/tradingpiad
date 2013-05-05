@@ -14,6 +14,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import arbitrage.Arbitrage;
+import arbitrage.CompetitivePrice;
+
 import com.xeiam.xchart.Chart;
 import com.xeiam.xchart.ChartBuilder;
 import com.xeiam.xchart.SwingWrapper;
@@ -23,6 +26,7 @@ import com.xeiam.xchart.StyleManager.LegendPosition;
 import forecast.TestIndicator;
 
 import strategies.Agent;
+import strategies.PriceManager;
 import strategies.Strategy;
 import strategies.StrategyObserver;
 import strategies.marketmaking.ForecastStrategy;
@@ -220,24 +224,26 @@ public class Main2 {
         
 		//runStrat();
 		
+		testArbitrage();
+		//recolteArbitrage("arbitragedata0405");
 	}
 	
 	public static void runStratPast(String filename) throws ExchangeError{
 		Wallet wal=new Wallet();
 		wal.setAmount(Currency.USD, new BigDecimal("1000"));
 		wal.setAmount(Currency.BTC, new BigDecimal("0"));
-		Market m =new MarketPast(filename,wal,60000);
+		Market[] listMarket ={new MarketPast(filename,wal,60000)};
 		
 		
 		//Strategy mmaking= new ProfitMarketMaking(m, new Decimal("0.0"), 3600, new Decimal("0.1"));
 		Strategy mmaking= new AchatVente();
 		//Strategy mmaking = new ForecastStrategy(new Decimal("100"));
-		Agent a=new Agent(mmaking,m,wal);
+		Agent a=new Agent(mmaking,listMarket,wal);
 		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);
 		a.addObserver(o);
 		a.execute();
 		 new SwingWrapper(o.getChart()).displayChart();
-		 new SwingWrapper(m.getTs().getChart()).displayChart();
+		 new SwingWrapper(listMarket[0].getTs().getChart()).displayChart();
 		 
 		 System.out.println("maxdd="+o.maxDrawDown());
 	}
@@ -246,24 +252,58 @@ public class Main2 {
 	public static void runStrat() throws ExchangeError{
 		Wallet wal=new Wallet();
 		wal.setAmount(Currency.USD, new BigDecimal(1000.0));
-		//Market m =new MarketMtgoxVirtual(Currency.BTC, Currency.USD,wal,30000,System.currentTimeMillis()+48*60*60000);
+		Market m =new MarketMtgoxVirtual(Currency.BTC, Currency.USD,wal,20000,System.currentTimeMillis()+60000);
 		
-		Market m =new MarketBtceHistory(Currency.BTC, Currency.USD,wal,"btce48h_3003.txt");
-		
-		
-		//DataRetriever d= new DataRetriever("mtgox48h_3003.txt","tradehist_mtgox48h_3003.txt",m);
-		//d.retrieve();
+		//Market[] listMarket ={new MarketBtceHistory(Currency.BTC, Currency.USD,wal,"btce48h_3003.txt")};
 		
 		
-		Strategy mmaking= new ProfitMarketMaking(m, new Decimal("0.001"), 30, new Decimal("0.2"));
-		Agent a=new Agent(mmaking,m,wal);
+		DataRetriever d= new DataRetriever("mtgox_0405.txt","tradehist_mtgox0405.txt",m);
+		d.retrieve();
+		
+		/*
+		Strategy mmaking= new ProfitMarketMaking(listMarket[0], new Decimal("0.001"), 30, new Decimal("0.2"));
+		Agent a=new Agent(mmaking,listMarket,wal);
 		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);
 		a.addObserver(o);
 		a.execute();
 		 new SwingWrapper(o.getChart()).displayChart();
 		 System.out.println("maxdd="+o.maxDrawDown());
-		
+		*/
 
+	}
+	
+	public static void recolteArbitrage(String runName) throws ExchangeError{
+		Market[] marketList= new Market[3];
+		Wallet w= new Wallet();
+		
+		long now =System.currentTimeMillis();
+		marketList[0]=new MarketBtceVirtual(Currency.BTC, Currency.USD, w, 60000, now+2*60*60000);
+		marketList[1]=new MarketBtceVirtual(Currency.LTC, Currency.USD, w, 60000, now+2*60*60000);
+		marketList[2]=new MarketBtceVirtual(Currency.LTC, Currency.BTC, w, 60000, now+2*60*60000);
+		
+		DataRetriever.retrieveMultipleMarketData(marketList, runName);
+	}
+	
+	public static void testArbitrage() throws ExchangeError{
+		Market[] marketList= new Market[3];
+		Wallet w= new Wallet();
+		
+		w.setAmount(Currency.USD, new Decimal("1000"));
+		w.setAmount(Currency.BTC, new Decimal("10"));
+		w.setAmount(Currency.LTC, new Decimal("400"));
+
+		marketList[0]=new MarketBtceHistory(Currency.BTC, Currency.USD, w, "arbitragedata0405BTC-USD");
+		marketList[1]=new MarketBtceHistory(Currency.LTC, Currency.USD, w, "arbitragedata0405LTC-USD"); 
+		marketList[2]=new MarketBtceHistory(Currency.LTC, Currency.BTC, w, "arbitragedata0405LTC-BTC");
+		PriceManager priceManager= new CompetitivePrice();
+		Strategy strat=new Arbitrage(priceManager,marketList);
+		Agent agent =new Agent(strat, marketList, w);
+		StrategyObserver o=new StrategyObserver(60000,Currency.USD);
+		agent.addObserver(o);
+		agent.execute();
+		 new SwingWrapper(o.getChart()).displayChart();
+		 
+		 System.out.println("maxdd="+o.maxDrawDown());
 	}
 	
 

@@ -110,11 +110,11 @@ public abstract class MarketMtgox extends Market {
 	}
 
 	public BigDecimal roundPrice(BigDecimal price) {
-		return price.setScale(5, RoundingMode.FLOOR);
+		return price.setScale(5, RoundingMode.HALF_UP);
 	}
 
 	public BigDecimal roundAmount(BigDecimal amount) {
-		return amount.setScale(8, RoundingMode.FLOOR);
+		return amount.setScale(8, RoundingMode.HALF_UP);
 	}
 
 	/**

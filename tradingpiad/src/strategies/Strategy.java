@@ -6,5 +6,5 @@ import market.EndOfRun;
 import market.Market;
 
 public interface Strategy {
-	public void execute( Market m) throws EndOfRun;
+	public void execute( Market[] marketList) throws EndOfRun;
 }

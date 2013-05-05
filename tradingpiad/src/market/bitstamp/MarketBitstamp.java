@@ -130,11 +130,11 @@ public abstract class MarketBitstamp extends Market {
 	}
 
 	public BigDecimal roundPrice(BigDecimal price){
-		return price.setScale(2,RoundingMode.FLOOR);
+		return price.setScale(2,RoundingMode.HALF_UP);
 	}
 	
 	public BigDecimal roundAmount(BigDecimal amount){
-		return amount.setScale(8,RoundingMode.FLOOR);
+		return amount.setScale(8,RoundingMode.HALF_UP);
 	}
 
 }

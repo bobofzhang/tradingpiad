@@ -93,8 +93,8 @@ public class DataRetriever {
 					continue;
 				}
 				
-				// Ecriture dans le fichier 1: le temps couyrant + les 3 json (ticker ,depth et trades)
-				out.write(String.valueOf(System.currentTimeMillis()));
+				// Ecriture dans le fichier 1: le temps courant + les 3 json (ticker ,depth et trades)
+				out.write(String.valueOf(market.getCurrentTime()));
 				out.write("\n");
 				out.write(market.getJsonTicker());
 				out.write("\n");
@@ -135,5 +135,83 @@ public class DataRetriever {
 			System.exit(0);
 		}
 	}
+	
+	public void retrieveOnce() throws ExchangeError, IOException {
 
+		market.updateAll(); // Mise a jour des donnees
+		
+		// Ecriture dans le fichier 1: le temps couyrant + les 3 json (ticker ,depth et trades)
+		out.write(String.valueOf(System.currentTimeMillis()));
+		out.write("\n");
+		out.write(market.getJsonTicker());
+		out.write("\n");
+		out.write(market.getJsonDepth());
+		out.write("\n");
+		out.write(market.getJsonTrades());
+		out.write("\n");
+		
+		
+		// Ecriture dans le fichier 2 : l'historique des echanges :date, prix, quantite, trade id et type
+		for (Trade t : market.last_trades) { // Parcours des echanges recents non ajoutes
+			out2.write(String.valueOf(t.date));
+			out2.write(",");
+			out2.write(t.price.toString());
+			out2.write(",");
+			out2.write(t.amount.toString());
+			out2.write(",");
+			out2.write(t.tid);
+			out2.write(",");
+			out2.write(t.trade_type.toString());
+
+			out2.write("\n");
+
+		}
+	}
+	
+	public static void retrieveMultipleMarketData(Market[] marketList,String runName){
+		DataRetriever[] retrieverList= new DataRetriever[marketList.length];
+		for(int i=0; i<marketList.length; i++){
+			
+			retrieverList[i]= new DataRetriever(
+					runName+marketList[i].cur1+"-"+marketList[i].cur2,
+					runName+"_hist_"+marketList[i].cur1+"-"+marketList[i].cur2,
+					marketList[i]);
+		}
+		
+		boolean stop=false;
+		
+		while(!stop){
+			for(DataRetriever d:retrieverList){
+				try {
+					d.retrieveOnce();
+					try {
+						d.market.nextTimeDelta();
+					} catch (EndOfRun e){
+						stop=true;
+					}
+				} catch (ExchangeError e) {
+					break;
+				} catch (IOException e) {
+					e.printStackTrace();
+					break;
+				}
+			}
+		
+		marketList[0].sleep();
+		}
+		for(DataRetriever d:retrieverList)
+			d.close();
+			
+	}
+	
+	public void close(){
+		try {
+			out.close();
+			out2.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 }

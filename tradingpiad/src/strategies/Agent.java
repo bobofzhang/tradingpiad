@@ -2,8 +2,11 @@ package strategies;
 
 import java.util.ArrayList;
 
+import utilities.Item;
+
 import market.EndOfRun;
 import market.Market;
+import market.Order;
 import market.Wallet;
 
 /**
@@ -13,7 +16,7 @@ import market.Wallet;
  */
 public class Agent{
 	public Strategy strat;
-	public Market m;
+	public Market[] marketList;
 	public Wallet w;
 	public ArrayList<MyObserver> obsList;  // La liste des observeurs : classe externe anlaysant l'execution de la strategie de l'agent
 	
@@ -22,9 +25,9 @@ public class Agent{
 	 * @param m Le marche
 	 * @param w Le protefeuille lié au amrche
 	 */
-	public Agent(Strategy strat,  Market m,Wallet w){
+	public Agent(Strategy strat,  Market[] marketList,Wallet w){
 		this.strat=strat;
-		this.m=m;
+		this.marketList=marketList;
 		this.w=w;
 		obsList=new ArrayList<MyObserver>();
 	}
@@ -37,18 +40,20 @@ public class Agent{
 		while(!fini){
 			System.out.println(w);
 			try{
-				strat.execute(m);
+				strat.execute(marketList);
 			}
 			catch(EndOfRun e){
 				fini=true;
 			}
 			this.updateAllObserver();
 		}
+		removeAllOrder(marketList);
+		System.out.println(w);
 	}
 	
 
 	public Market[] getMarkets() {
-		return new Market[]{m};
+		return marketList;
 	}
 
 	public Wallet getWallet() {
@@ -68,6 +73,20 @@ public class Agent{
 	public void updateAllObserver(){
 		for(MyObserver a:obsList)
 			a.update(this);
+	}
+	
+	/**
+	 * Suprime tous les ordres places dasn chaque marche du tableau.
+	 * @param marketTab La liste des marches dont on veut supprimmer les ordres.
+	 */
+	public static void removeAllOrder(Market[] marketTab) {
+		for(Market m:marketTab){
+			for(Item<Order> item:m.getOpenBids())
+				m.cancelOrder(item);
+			for(Item<Order> item:m.getOpenAsks())
+				m.cancelOrder(item);
+		}
+		
 	}
 
 }

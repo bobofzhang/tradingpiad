@@ -77,9 +77,12 @@ public class MarketMtgoxHistory extends MarketMtgox{
 	}
 
 	@Override
-	public void waitTimeDelta() throws EndOfRun {
+	public void nextTimeDelta() throws EndOfRun {
 		histData.nextData();
 	}
+	
+	@Override 
+	public void sleep(){}
 	
 	@Override
 	public long getStartTime() {

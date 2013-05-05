@@ -162,11 +162,13 @@ public class MarketPast extends Market{
 	}
 
 	@Override
-	public void waitTimeDelta() throws EndOfRun {
+	public void nextTimeDelta() throws EndOfRun {
 		if(currentTrade==null)
 			throw new EndOfRun();
 		this.curTime += this.timeDelta;
 	}
+	@Override
+	public void sleep(){}
 
 	@Override
 	public long getStartTime() {

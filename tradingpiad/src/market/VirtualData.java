@@ -13,8 +13,11 @@ import utilities.Op;
 
 
 /**
- * Classe representant les donnees virtuelles lorsqu'on fait une simulation
- *
+ * Classe representant les donnees virtuelles lorsqu'on fait une simulation.
+ * Les donnes des ordres sont constitues des ordres virtuels de l'agent.
+ * Cette classe implemente toutes les operations permettant de manipuler ces ordres virtuels:
+ * - placer/retirer des ordres
+ * - verifier si les ordres laces auraient pu etre executes
  */
 public class VirtualData {
 	
@@ -51,7 +54,7 @@ public class VirtualData {
 		o.amount=market.roundAmount(o.amount);
 		
 		// On retire du wallet l'argent mise dans le marche
-		BigDecimal x=Op.mult(o.price, o.amount);
+		BigDecimal x=market.roundPrice(Op.mult(o.price, o.amount));
 		wallet.setAmount(market.cur2, Op.neg(x));
 		
 		linked_bids.insert(o);
@@ -76,19 +79,19 @@ public class VirtualData {
 	}
 	
 	/**
-	 * @return La liste des asks
+	 * @return La liste des asks virtuels
 	 */
 	public LinkedList<Order> getOpenAsks() { return linked_asks ; }
 	
 	/**
-	 * @return La liste des bids
+	 * @return La liste des bids virtuels
 	 */
 	public LinkedList<Order> getOpenBids() { return linked_bids ; }
 	
 
 	
 	/**
-	 * Supprimer un ordre
+	 * Supprimer un ordre virtuel
 	 * @param item L'item contenant l'ordre a supprimmer
 	 */
 	public void cancelOrder(Item<Order> item){
@@ -99,7 +102,7 @@ public class VirtualData {
 		
 		if(item.e.trade_type == Type.BID){
 			linked_bids.delete(item);
-			BigDecimal x=Op.mult(item.e.amount,item.e.price);
+			BigDecimal x=market.roundPrice(Op.mult(item.e.amount,item.e.price));
 			wallet.setAmount(market.cur2, x);// on recupere l'argent investi dans l'ordre dans le wallet
 		}		
 	}
@@ -128,7 +131,7 @@ public class VirtualData {
 	
 	
 	/**
-	 * @return Le portefeuille lie qu 
+	 * @return Le portefeuille lie au marche auquel est destine les ordres virtuels
 	 */
 	public Wallet getWallet(){
 		return wallet;
@@ -136,8 +139,8 @@ public class VirtualData {
 	}
 	
 	/**
-	 * Verifie les derniers echanges non verifies, les compare avec les ordres virtuels de l'agent trader et aisni determine si ils auraient pu être executés ou non.
-	 * Si c'est le cas , cela remplit le wallet avec l'argent gagnee correspondante et retire l'ordre execute des donnees virtuelles
+	 * Verifie si les ordres virtuels auraient pu etre executes en vrai en comparant
+	 * les ordres virtuels avec les echanges recents de l'historique pas encore analyses.
 	 */
 	public void checkNewTrades() {	
 		Assert.nullCheck(market.last_trades, market.trades);
@@ -157,7 +160,7 @@ public class VirtualData {
 		Currency cur;
 		for (int i = 0; i < market.last_trades.length; i++) { // pour chaque echange recent non encore verifie
 			current = market.last_trades[i];
-			System.out.println("aj"+current);
+			//System.out.println("aj"+current);
 			current_amount = current.amount;
 			
 			// Selon si l'echnage courant est un bid ou un ask on choisit des avriabels differentes (après le traitement est quasi similaire à ces variables pres)
@@ -195,10 +198,12 @@ public class VirtualData {
 					}
 					
 					// On remplit le wallet avec la quantite gagne a l'execution
-					if (current.trade_type.equals(Type.ASK))
+					if (current.trade_type.equals(Type.ASK)){
 						wallet.setAmount(cur,market.roundPrice(market.subFee( Op.mult(amount_executed,best.price))));
-					else
+					}
+					else{
 						wallet.setAmount(cur, market.roundAmount(market.subFee( amount_executed)));
+					}
 					
 					// Si le meilleur ordre virtuel est totalement vide, on le retire
 					if (best.amount.compareTo(market.getAmountPrecision())<=0) {
@@ -209,7 +214,7 @@ public class VirtualData {
 				}
 
 			} catch (NoSuchElementException e) {
-				// Rien a faire, juste passer ï¿½ l'echange suivant
+				// Rien a faire, juste passer a l'echange suivant
 			}
 			market.trades.add(current); // On fait passer l'echange courant à l'historique deja verifiee
 			market.getTs().feed(current);// On remplis la time serie de l'evolution du marche

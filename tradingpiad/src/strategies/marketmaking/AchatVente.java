@@ -28,7 +28,8 @@ public class AchatVente implements Strategy {
 	}
 
 	@Override
-	public void execute(Market m) throws EndOfRun {
+	public void execute(Market[] marketList) throws EndOfRun {
+		Market m=marketList[0];
 		long buyLimitTime, sellLimitTime;
 		try {
 			m.updateAll();
