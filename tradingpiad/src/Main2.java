@@ -220,11 +220,11 @@ public class Main2 {
 		
 		
 		//runStratPast("mtgox01082012_15082012.txt");
-		//runStratPast("mtgox10042013_13042013.txt");
+		runStratPast("mtgox10042013_13042013.txt");
         
 		//runStrat();
 		
-		testArbitrage();
+		//testArbitrage();
 		//recolteArbitrage("arbitragedata0405");
 	}
 	
@@ -235,8 +235,8 @@ public class Main2 {
 		Market[] listMarket ={new MarketPast(filename,wal,60000)};
 		
 		
-		//Strategy mmaking= new ProfitMarketMaking(m, new Decimal("0.0"), 3600, new Decimal("0.1"));
-		Strategy mmaking= new AchatVente();
+		Strategy mmaking= new ProfitMarketMaking(listMarket[0], new Decimal("0.0"), 3600, new Decimal("0.1"));
+		//Strategy mmaking= new AchatVente();
 		//Strategy mmaking = new ForecastStrategy(new Decimal("100"));
 		Agent a=new Agent(mmaking,listMarket,wal);
 		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);

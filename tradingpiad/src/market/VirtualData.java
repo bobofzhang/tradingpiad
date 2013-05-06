@@ -55,6 +55,8 @@ public class VirtualData {
 		
 		// On retire du wallet l'argent mise dans le marche
 		BigDecimal x=market.roundPrice(Op.mult(o.price, o.amount));
+		System.out.println("amount spent="+x);
+		System.out.println("amount wallet="+wallet.getAmount(market.cur2));
 		wallet.setAmount(market.cur2, Op.neg(x));
 		
 		linked_bids.insert(o);

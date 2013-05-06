@@ -38,7 +38,7 @@ public class Agent{
 	public void execute(){
 		boolean fini=false;
 		while(!fini){
-			System.out.println(w);
+			
 			try{
 				strat.execute(marketList);
 			}

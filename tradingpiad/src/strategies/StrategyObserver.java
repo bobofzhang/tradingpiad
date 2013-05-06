@@ -34,6 +34,7 @@ public class StrategyObserver implements MyObserver {
 	long lastTime, timeDelta;
 	private final Currency refCurrency;
 	private List<Double> listValue;
+	private Wallet initWallet=null;
 
 	/**
 	 * @param timeDelta Tous les combiens , on "photographie" l'etat du portfeuille au cours de l'execution de la strategie 
@@ -52,9 +53,26 @@ public class StrategyObserver implements MyObserver {
 		Agent a = (Agent) o;
 		Market[] markets = a.getMarkets();
 		Wallet w = a.getWallet();
+		if(initWallet==null)
+			initWallet=w.clone();
+		BigDecimal walletTrueValue= Op.sub(evalueWallet(refCurrency,markets,w),evalueWallet(refCurrency,markets,initWallet));
+		System.out.println(walletTrueValue);
+		
+		if(lastTime==0){
+			lastTime=markets[0].getCurrentTime();
+			listValue.add(new Double(walletTrueValue.doubleValue()));
+		}
+		else if (markets[0].getCurrentTime() > lastTime + timeDelta) {
+			listValue.add(new Double(walletTrueValue.doubleValue()));
+			lastTime+=timeDelta;
+		}
+
+	}
+	
+	public static BigDecimal evalueWallet(Currency ref,Market[] marketList,Wallet w){
 
 		// Get the list of all the currency used by the trader agent
-		ArrayList<Currency> listCurrencies = Util.getCurrencyList(markets);
+		ArrayList<Currency> listCurrencies = Util.getCurrencyList(marketList);
 
 		// Create a corresponding array wich mapping a currency to an amount
 		BigDecimal[] tab = new BigDecimal[listCurrencies.size()];
@@ -63,7 +81,7 @@ public class StrategyObserver implements MyObserver {
 			tab[listCurrencies.indexOf(c)] = w.getAmount(c);
 
 		// We also add the quantities of BTC,USD,etc.. inside the market
-		for (Market m : markets) {
+		for (Market m : marketList) {
 			int i1 = listCurrencies.indexOf(m.cur1);
 			int i2 = listCurrencies.indexOf(m.cur2);
 
@@ -73,33 +91,23 @@ public class StrategyObserver implements MyObserver {
 		}
 		
 
-		for (Market m : markets) {
+		for (Market m : marketList) {
 			int i1 = listCurrencies.indexOf(m.cur1);
 			int i2 = listCurrencies.indexOf(m.cur2);
 
-			if (m.cur1.equals(refCurrency) && Op.sup0(tab[i2])) {
-				tab[i1] = Op.add(tab[i1], Op.div(tab[i2], m.ticker.sell));
+			if (m.cur1.equals(ref) && Op.sup0(tab[i2])) {
+				tab[i1] = Op.add(tab[i1], Op.div(tab[i2], m.ticker.buy));
 				tab[i2] = Decimal.ZERO;
 			}
 
-			if (m.cur2.equals(refCurrency) && Op.sup0(tab[i1])) {
-				tab[i2] = Op.add(tab[i2], Op.mult(tab[i1], m.ticker.buy));
+			if (m.cur2.equals(ref) && Op.sup0(tab[i1])) {
+				tab[i2] = Op.add(tab[i2], Op.mult(tab[i1], m.ticker.sell));
 				tab[i1] = Decimal.ZERO;
 			}
 
 		}
 
-		BigDecimal total = tab[listCurrencies.indexOf(refCurrency)];
-		
-		if(lastTime==0){
-			lastTime=markets[0].getCurrentTime();
-			listValue.add(new Double(total.doubleValue()));
-		}
-		else if (markets[0].getCurrentTime() > lastTime + timeDelta) {
-			listValue.add(new Double(total.doubleValue()));
-			lastTime+=timeDelta;
-		}
-
+		return tab[listCurrencies.indexOf(ref)];
 	}
 	
 	/**

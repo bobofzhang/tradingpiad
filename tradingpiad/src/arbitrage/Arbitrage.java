@@ -1,6 +1,7 @@
 package arbitrage;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,15 +61,16 @@ public class Arbitrage implements Strategy {
 		}
 		//if(Math.random()>0.25)
 			Agent.removeAllOrder(marketTab);
+			System.out.println(marketTab[0].getWallet());
 		
-		this.setInvestAmount(new Decimal("0.01"), marketTab[0].getWallet());
+		this.setInvestAmount(new Decimal("0.05"), marketTab[0].getWallet());
 		
 		
 		List<CustomEdge> serieEchangesOpt=this.getSerieEchangesOpt();
 		if (serieEchangesOpt != null) {
 			BigDecimal gainOpt = gain(serieEchangesOpt);
 
-			if (false && gainOpt.compareTo(Decimal.ONE) > 0) {
+			if (gainOpt.compareTo(Decimal.ONE) > 0) {
 				System.out.println(gainOpt);
 				CustomEdge e1 = serieEchangesOpt.get(0);
 				System.out.println(serieEchangesOpt);
@@ -152,10 +154,13 @@ public class Arbitrage implements Strategy {
 
 			if (!edge.isReversed()) {
 				maxInitAmount = maxInitAmount.min(market.getWallet().getAmount(market.cur1));
+				System.out.println("montant inital"+market.cur1+":"+maxInitAmount);
 			} 
 			else {
 				maxInitAmount = maxInitAmount.min( market.getWallet().getAmount(market.cur2));
+				System.out.println("montant inital"+market.cur2+":"+maxInitAmount);
 			}
+			
 		}	
 
 		return maxInitAmount ; 
@@ -168,20 +173,21 @@ public class Arbitrage implements Strategy {
 		BigDecimal quantite, quantiteApres;
 		Market market;
 		
-		quantite= quantiteInitiale ; 
+		quantite= Op.sub(quantiteInitiale,!listEdges.get(0).isReversed()?listEdges.get(0).getmarket().getAmountPrecision():listEdges.get(0).getmarket().getPricePrecision());
 
 		for (CustomEdge edge : listEdges){
 
 			market = edge.getmarket();
-			
 			if (!edge.isReversed()){
+				System.out.println("quantite"+market.cur1+":"+quantite);
 				edge.getmarket().addAsk(new Order(edge.getSellPrice() ,quantite,Type.ASK));				
 				quantiteApres =edge.quantiteApresEchange(quantite);
 
 			}else{
-				quantiteApres=edge.quantiteApresEchange(quantite);
+				System.out.println("quantite"+market.cur2+":"+quantite);
 				BigDecimal amount = market.roundAmount(Op.div(quantite, edge.getBuyPrice()));
 				edge.getmarket().addBid(new Order(edge.getBuyPrice() , amount,Type.BID));
+				quantiteApres=edge.quantiteApresEchange(quantite);
 
 			}
 			quantite=quantiteApres;

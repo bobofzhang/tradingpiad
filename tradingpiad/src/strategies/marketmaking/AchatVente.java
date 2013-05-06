@@ -50,7 +50,7 @@ public class AchatVente implements Strategy {
 		System.out.println(buyPrice);
 		System.out.println(sellPrice);
 		
-		maxbtc=new Decimal("100");
+		maxbtc=new Decimal("1.5");
 		BigDecimal buyAmount = Op.sub(maxbtc, m.getTotalCur1Amount()); // Montant qu'on veut acheter (<= � 0 si on veut rien acheter)
 		BigDecimal buyAmountPossible;
 		

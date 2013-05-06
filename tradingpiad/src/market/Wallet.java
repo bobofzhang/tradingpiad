@@ -59,8 +59,8 @@ public class Wallet {
 	 */
 	public Wallet clone(){
 		Wallet w= new Wallet();
-		for(int i=0; i< wallet.length;i++)
-			wallet[i]=this.getAmount(Currency.values()[i]);
+		for(Currency cur:Currency.values())
+			w.setAmount(cur, this.getAmount(cur));
 		return w;
 		
 	}
