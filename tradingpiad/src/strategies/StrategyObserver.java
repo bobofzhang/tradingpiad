@@ -34,7 +34,6 @@ public class StrategyObserver implements MyObserver {
 	long lastTime, timeDelta;
 	private final Currency refCurrency;
 	private List<Double> listValue;
-	private Wallet initWallet=null;
 
 	/**
 	 * @param timeDelta Tous les combiens , on "photographie" l'etat du portfeuille au cours de l'execution de la strategie 
@@ -53,9 +52,7 @@ public class StrategyObserver implements MyObserver {
 		Agent a = (Agent) o;
 		Market[] markets = a.getMarkets();
 		Wallet w = a.getWallet();
-		if(initWallet==null)
-			initWallet=w.clone();
-		BigDecimal walletTrueValue= Op.sub(evalueWallet(refCurrency,markets,w),evalueWallet(refCurrency,markets,initWallet));
+		BigDecimal walletTrueValue= evalueWallet(refCurrency,markets,w);
 		System.out.println(walletTrueValue);
 		
 		if(lastTime==0){
@@ -124,7 +121,7 @@ public class StrategyObserver implements MyObserver {
 		double[] evTab= new double[listValue.size()-1];
 		
 		for(int i=1;i<listValue.size();i++){
-			evTab[i]=listValue.get(i).doubleValue()/listValue.get(i-1)-1;
+			evTab[i-1]=listValue.get(i).doubleValue()/listValue.get(i-1)-1;
 		}
 		
 		return evTab;

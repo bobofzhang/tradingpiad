@@ -41,8 +41,8 @@ public abstract class Market extends Observable{
 	private TimeSerie ts ;
 	
 	Market() {
-		trades = new Trades(500);
-		ts = new TimeSerie(500, 7200);
+		trades = new Trades(1000);
+		ts = new TimeSerie(2000, 1200);
 	}
 	
 	public Market(Currency cur1, Currency cur2,String exchangeName){
@@ -50,8 +50,8 @@ public abstract class Market extends Observable{
 		this.cur1=cur1;
 		this.cur2=cur2;
 		this.exchangeName=exchangeName;
-		trades=new Trades(500);
-		ts = new TimeSerie(500, 600);
+		trades=new Trades(1000);
+		ts = new TimeSerie(2000, 1200);
 		
 	}
 	

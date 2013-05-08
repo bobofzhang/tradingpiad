@@ -212,32 +212,32 @@ public class Main2 {
         //TestIndicator.test();
 		
 		/*try {
-			MarketPast.retrieveMtgox("mtgox10042013_13042013.txt", Currency.USD, "10/04/2013", "13/04/2013");
+			MarketPast.retrieveMtgox("mtgox01042013_01052013.txt", Currency.USD, "01/04/2013", "01/05/2013");
 		} catch (ParseException e) {
 			System.out.println("erreur dates");
 		}*/
 		
 		
 		
-		//runStratPast("mtgox01082012_15082012.txt");
-		runStratPast("mtgox10042013_13042013.txt");
-        
+		runStratPast("mtgox28042013_05052013.txt");
+		//paramEstimation("mtgox28042013_05052013.txt");
+        //displayChart();
 		//runStrat();
 		
 		//testArbitrage();
-		//recolteArbitrage("arbitragedata0405");
+		//recolteArbitrage("arbitragedata0805");
 	}
 	
 	public static void runStratPast(String filename) throws ExchangeError{
 		Wallet wal=new Wallet();
 		wal.setAmount(Currency.USD, new BigDecimal("1000"));
 		wal.setAmount(Currency.BTC, new BigDecimal("0"));
-		Market[] listMarket ={new MarketPast(filename,wal,60000)};
+		Market[] listMarket ={new MarketPast(filename,wal,5000)};
 		
 		
-		Strategy mmaking= new ProfitMarketMaking(listMarket[0], new Decimal("0.0"), 3600, new Decimal("0.1"));
-		//Strategy mmaking= new AchatVente();
-		//Strategy mmaking = new ForecastStrategy(new Decimal("100"));
+		//Strategy mmaking= new ProfitMarketMaking(listMarket[0], new Decimal("0.01"), 3600, new Decimal("0.00005"));
+		//Strategy mmaking= new AchatVente(new Decimal("0.15"));
+		Strategy mmaking = new ForecastStrategy(new Decimal("0.3"),10);
 		Agent a=new Agent(mmaking,listMarket,wal);
 		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);
 		a.addObserver(o);
@@ -246,6 +246,8 @@ public class Main2 {
 		 new SwingWrapper(listMarket[0].getTs().getChart()).displayChart();
 		 
 		 System.out.println("maxdd="+o.maxDrawDown());
+		 System.out.println("mean="+o.mean());
+		 System.out.println("var="+o.standardDeviation());
 	}
 	
 	
@@ -277,9 +279,9 @@ public class Main2 {
 		Wallet w= new Wallet();
 		
 		long now =System.currentTimeMillis();
-		marketList[0]=new MarketBtceVirtual(Currency.BTC, Currency.USD, w, 60000, now+2*60*60000);
-		marketList[1]=new MarketBtceVirtual(Currency.LTC, Currency.USD, w, 60000, now+2*60*60000);
-		marketList[2]=new MarketBtceVirtual(Currency.LTC, Currency.BTC, w, 60000, now+2*60*60000);
+		marketList[0]=new MarketBtceVirtual(Currency.BTC, Currency.USD, w, 60000, now+24*60*60000);
+		marketList[1]=new MarketBtceVirtual(Currency.LTC, Currency.USD, w, 60000, now+24*60*60000);
+		marketList[2]=new MarketBtceVirtual(Currency.LTC, Currency.BTC, w, 60000, now+24*60*60000);
 		
 		DataRetriever.retrieveMultipleMarketData(marketList, runName);
 	}
@@ -304,6 +306,73 @@ public class Main2 {
 		 new SwingWrapper(o.getChart()).displayChart();
 		 
 		 System.out.println("maxdd="+o.maxDrawDown());
+	}
+	
+	public static void displayChart(List<Number> x,List<Number> y,String title, String xmsg,String ymsg ){
+			/*List<Number> y = new ArrayList<Number>();
+			List<Number> x = new ArrayList<Number>();
+			
+			y.add(4.682855506854544E-5);
+			x.add(0.001);
+			
+			y.add(1.7615198650222232E-4);
+			x.add(0.005);
+			
+			y.add(2.6019056745360915E-4);
+			x.add(0.01);
+			
+			y.add(-4.144196755046438E-4);
+			x.add(0.05);
+			
+			
+			y.add(-0.0014512758409920196);
+			x.add(0.1);
+			
+			y.add(-0.004830530136475542);
+			x.add(1);*/
+			
+			
+
+			Chart chart = new ChartBuilder().chartType(ChartType.Line).width(800).height(600).title("AreaChart01").xAxisTitle(xmsg).yAxisTitle(ymsg).build();
+
+			// Customize Chart
+			chart.getStyleManager().setChartTitleVisible(false);
+			chart.getStyleManager().setLegendPosition(LegendPosition.InsideNE);
+			chart.getStyleManager().setDatePattern("dd/MM");
+			chart.getStyleManager().setLocale(Locale.FRANCE);
+
+			// Series
+			chart.addSeries(title, x, y);
+			 new SwingWrapper(chart).displayChart();
+	}
+	
+	public static void  paramEstimation(String filename){
+		int[] paramList={3,5,8,10,12,15,20,25,30,40};
+		List<Number> y=new ArrayList<Number>();
+		List<Number> yvar=new ArrayList<Number>();
+		List<Number> x=new ArrayList<Number>();
+		for (int param : paramList) {
+			Wallet wal = new Wallet();
+			wal.setAmount(Currency.USD, new BigDecimal("1000"));
+			wal.setAmount(Currency.BTC, new BigDecimal("0"));
+			Market[] listMarket = { new MarketPast(filename, wal, 10000) };
+
+			//Strategy mmaking = new ProfitMarketMaking(listMarket[0], new Decimal(param), 3600, new Decimal("0.0001"));
+			// Strategy mmaking= new AchatVente();
+			Strategy mmaking = new ForecastStrategy(new Decimal("0.3"),param);
+			Agent a = new Agent(mmaking, listMarket, wal);
+			StrategyObserver o = new StrategyObserver(6 * 3600000, Currency.USD);
+			a.addObserver(o);
+			a.execute();
+			//new SwingWrapper(o.getChart()).displayChart();
+			//new SwingWrapper(listMarket[0].getTs().getChart()).displayChart();
+			x.add(Double.valueOf(param));
+			y.add(o.mean());
+			yvar.add(o.standardDeviation());
+		}
+		
+		displayChart(x,y,"Gain moyen en fonction de la taille de la fenetre de temps","Gain moyen","Fenetre de temps");
+		displayChart(x,yvar,"Ecart type gain en fonction de la taille de la fenetre de temps","Ecart type gain","Fenetre de temps");
 	}
 	
 

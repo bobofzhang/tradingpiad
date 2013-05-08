@@ -34,9 +34,9 @@ public class ForecastStrategy implements Strategy{
 	private long buyLimitTime, sellLimitTime;
 	
 	
-	public ForecastStrategy(BigDecimal maxbtc) {
+	public ForecastStrategy(BigDecimal maxbtc, int window_size) {
 		this.maxbtc = maxbtc;
-		//forecast = new Forecast();
+		this.window_size=window_size;
 	}
 	
 	
@@ -47,10 +47,8 @@ public class ForecastStrategy implements Strategy{
 		Market m=marketList[0];
 		forecast = new Forecast(m.getTs());
 		forecast.calcul_rt(window_size);
-		System.out.println("SIZE OF TS ================> " + m.getTs().size());
 		
 		try {
-			System.out.println(m.getTicker());
 			m.updateAll();
 		} catch (ExchangeError e1) {
 			System.out.println(e1);
@@ -62,21 +60,17 @@ public class ForecastStrategy implements Strategy{
 		
 		long currentTime = m.getCurrentTime();
 		
-		System.out.println(m.getJsonDepth());
 		
 		BigDecimal bid = m.getDepth().bids.length>0?m.getDepth().bids[0].price:m.getTicker().buy;
 		BigDecimal ask =  m.getDepth().asks.length>0?m.getDepth().asks[0].price:m.getTicker().sell;
 		
-		System.out.println(m.getDepth());
 		
 		BigDecimal buyPrice = Op.add(bid, m.getPricePrecision());
 		BigDecimal sellPrice = Op.sub(ask, m.getPricePrecision());
 		
-		System.out.println(buyPrice);
 		
-		System.out.println(sellPrice);
-		
-		BigDecimal buyAmount = Op.sub(maxbtc, m.getWallet().getAmount(m.cur1)); // Montant qu'on veut acheter (<= � 0 si on veut rien acheter)
+		BigDecimal buyAmount = Op.sub(maxbtc, m.getWallet().getAmount(m.cur1)); // Montant qu'on veut acheter (<= 0 si on veut rien acheter)
+		System.out.println("buyamount="+buyAmount);
 		BigDecimal buyAmountPossible;
 		
 	
@@ -90,15 +84,13 @@ public class ForecastStrategy implements Strategy{
 		
 		// Minimum entre le montant qu'on veut acheter et celui qu'on peut acheter
 		buyAmountPossible = m.roundAmount(Op.min(buyAmount, Op.div(m.getWallet().getAmount(m.cur2), buyPrice)));
-		buyAmountPossible = Op.sub(buyAmountPossible, Decimal.ONE);
 		
 		// Si il reste du temps pour acheter et si le montant est positif
-		System.out.println("profit=" + m.getProfit(sellPrice, buyPrice));
-		System.out.println(currentTime + "and" + buyLimitTime + "," + m.getOpenBids().isEmpty() + "," + buyAmountPossible.compareTo(new Decimal(1.0)));
+		System.out.println(currentTime + "and" + buyLimitTime + "," + m.getOpenBids().isEmpty() + "," +"val="+buyAmountPossible+" | "+ buyAmountPossible.compareTo(m.getAmountPrecision()));
 		
 
 		
-		if (currentTime <= buyLimitTime && m.getOpenBids().isEmpty() && buyAmountPossible.compareTo(new Decimal(1.0)) > 0) {
+		if (currentTime <= buyLimitTime && m.getOpenBids().isEmpty() && buyAmountPossible.compareTo(m.getAmountPrecision()) > 0) {
 			
 			System.out.println("buyAmount=" + buyAmountPossible);
 			System.out.println("price=" + buyPrice);
@@ -126,7 +118,7 @@ public class ForecastStrategy implements Strategy{
 
 		System.out.println(currentTime + "and" + sellLimitTime);
 		// si il reste du temps pour vendre
-		if (currentTime <= sellLimitTime && m.getWallet().getAmount(m.cur1).compareTo(BigDecimal.ZERO) > 0) {
+		if (currentTime <= sellLimitTime && m.getWallet().getAmount(m.cur1).compareTo(m.getAmountPrecision()) > 0) {
 
 			// On parcours chaque bid execute
 			for (Item<Order> item : m.getExecutedBids()) {
@@ -143,6 +135,8 @@ public class ForecastStrategy implements Strategy{
 
 				
 			}
+			
+			
 			// Si il n'y pas plus de temps pour vendre, alors on vends a perte
 		} else if (m.getWallet().getAmount(m.cur1).compareTo(BigDecimal.ZERO) > 0) {
 			// On vide les asks

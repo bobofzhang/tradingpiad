@@ -69,8 +69,15 @@ public class TimeSerie {
 		while( t.date>=endPointDate ){
 			createdPoint=curPoint;
 			
-			if (createdPoint != null) // Si on est pas au debut ou il n'y a aps encore de point courant
-				array.add(curPoint);
+			if (createdPoint != null){ // Si on est pas au debut ou il n'y a aps encore de point courant
+				
+				if(curPoint.close==Decimal.ZERO){
+					array.add(array.getLast());
+				}
+				else
+					array.add(curPoint);
+				
+			}
 			
 			curPoint=new TSPoint(Decimal.ZERO, Decimal.ZERO, new PosInf(),Decimal.ZERO,Decimal.ZERO);
 			endPointDate+=timeInterval;
@@ -108,7 +115,7 @@ public class TimeSerie {
 		// Customize Chart
 		chart.getStyleManager().setChartTitleVisible(false);
 		chart.getStyleManager().setLegendPosition(LegendPosition.InsideNW);
-		chart.getStyleManager().setDatePattern("HH:mm");
+		chart.getStyleManager().setDatePattern("dd/MM");
 		chart.getStyleManager().setLocale(Locale.FRANCE);
 
 		// Series

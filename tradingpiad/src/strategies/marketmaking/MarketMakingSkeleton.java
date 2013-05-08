@@ -7,6 +7,7 @@ import market.ExchangeError;
 import market.Market;
 import market.Order;
 import market.Type;
+import strategies.Agent;
 import strategies.Strategy;
 
 /**
@@ -28,6 +29,7 @@ public abstract class MarketMakingSkeleton implements Strategy{
 			alors ne rien faire au temps t courant (on retenhtera de faire quelque chose au prochain temps t+1 ) )*/
 			return;
 		}
+		Agent.removeAllOrder(marketList);
 		
 		// On vide l'historique des bids execcute car cette strategie ne s'en sert pas
 		m.getExecutedBids().clear();
@@ -66,7 +68,7 @@ public abstract class MarketMakingSkeleton implements Strategy{
 	/**
 	 * Mise a jour des informations.
 	 * Ici,on re-calcul certaines informations en fonction de l'etat du marche actuel
-	 * Cette methode doit etre invoque avant els methodes getBuyPrice getBuyAmount, getSellPrice et getSellAmount
+	 * Cette methode doit etre invoque avant les methodes getBuyPrice getBuyAmount, getSellPrice et getSellAmount
 	 */
 	protected abstract void updateInfos();
 	
