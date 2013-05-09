@@ -101,8 +101,8 @@ public class MarketPast extends Market{
 			this.depth.asks=new Order[1];
 			this.depth.bids=new Order[1];
 			
-			try{
-				currentTrade=currentTrade(br.readLine());
+			try{String str=br.readLine();
+				currentTrade=currentTrade(str);
 			}catch(IOException e){
 				e.printStackTrace();
 				System.exit(0);
@@ -262,7 +262,8 @@ public class MarketPast extends Market{
 	public static Trade currentTrade(String line){
 		if(line != null){
 			String [] tab=line.split(",");
-			return new Trade(Long.parseLong(tab[0]), new Decimal(tab[1]),new Decimal(tab[2]), tab[3],Type.valueOf(tab[4]));
+			System.out.println(tab[0]+",");
+			return new Trade(Long.valueOf(tab[0].trim()), new Decimal(tab[1]),new Decimal(tab[2]), tab[3],Type.valueOf(tab[4]));
 		}
 		else
 			return null;
@@ -309,10 +310,9 @@ public class MarketPast extends Market{
 
 			ObjectMapper mapper = MarketMtgox.produceMapper();
 			while (last_time < end) {
-				URL url = new URL("http://data.mtgox.com/api/0/data/getTrades.php?Currency=" + cur + "&since=" + last_tid);
+				URL url = new URL("https://data.mtgox.com/api/0/data/getTrades.php?Currency=" + cur + "&since=" + last_tid);
 				try {
 					String json = Util.getData(url);
-
 					Trade[] last_trades = mapper.readValue(json, Trade[].class);
 					for (Trade t : last_trades)
 						out.write(String.valueOf(t.date) +","+ t.price.toString() +","+ t.amount.toString() +","+ t.tid +","+ t.trade_type.toString() + "\n");

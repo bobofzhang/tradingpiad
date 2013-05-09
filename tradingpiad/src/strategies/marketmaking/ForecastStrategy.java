@@ -3,12 +3,14 @@ package strategies.marketmaking;
 import java.math.BigDecimal;
 import java.util.Iterator;
 
+import market.Currency;
 import market.EndOfRun;
 import market.ExchangeError;
 import market.Market;
 import market.Order;
 import market.Type;
 import strategies.Strategy;
+import strategies.StrategyObserver;
 import utilities.Decimal;
 import utilities.Forecast;
 import utilities.Item;
@@ -26,7 +28,7 @@ import utilities.Op;
  */
 public class ForecastStrategy implements Strategy{
 
-	private BigDecimal maxbtc;
+	private BigDecimal percent;
 	
 	private Forecast forecast ; 
 	private int start_index = 0  ; 
@@ -34,8 +36,8 @@ public class ForecastStrategy implements Strategy{
 	private long buyLimitTime, sellLimitTime;
 	
 	
-	public ForecastStrategy(BigDecimal maxbtc, int window_size) {
-		this.maxbtc = maxbtc;
+	public ForecastStrategy(BigDecimal percent, int window_size) {
+		this.percent = percent;
 		this.window_size=window_size;
 	}
 	
@@ -69,8 +71,8 @@ public class ForecastStrategy implements Strategy{
 		BigDecimal sellPrice = Op.sub(ask, m.getPricePrecision());
 		
 		
+		BigDecimal maxbtc=Op.div(Op.mult(StrategyObserver.evalueWallet(Currency.USD, marketList, m.getWallet()), percent), m.getTicker().sell);
 		BigDecimal buyAmount = Op.sub(maxbtc, m.getWallet().getAmount(m.cur1)); // Montant qu'on veut acheter (<= 0 si on veut rien acheter)
-		System.out.println("buyamount="+buyAmount);
 		BigDecimal buyAmountPossible;
 		
 	
@@ -85,16 +87,10 @@ public class ForecastStrategy implements Strategy{
 		// Minimum entre le montant qu'on veut acheter et celui qu'on peut acheter
 		buyAmountPossible = m.roundAmount(Op.min(buyAmount, Op.div(m.getWallet().getAmount(m.cur2), buyPrice)));
 		
-		// Si il reste du temps pour acheter et si le montant est positif
-		System.out.println(currentTime + "and" + buyLimitTime + "," + m.getOpenBids().isEmpty() + "," +"val="+buyAmountPossible+" | "+ buyAmountPossible.compareTo(m.getAmountPrecision()));
 		
 
 		
 		if (currentTime <= buyLimitTime && m.getOpenBids().isEmpty() && buyAmountPossible.compareTo(m.getAmountPrecision()) > 0) {
-			
-			System.out.println("buyAmount=" + buyAmountPossible);
-			System.out.println("price=" + buyPrice);
-			System.out.println("totalprice=" + Op.mult(buyPrice, buyAmountPossible));
 			
 			
 			// Si le profit est superieur a la precision des prix
@@ -108,7 +104,6 @@ public class ForecastStrategy implements Strategy{
 			//forecast.calcul_rt( window_size);
 			if (forecast.is_forecast_positif() == true) {
 				
-				System.out.println("************************************************************"+forecast.is_forecast_positif());
 				m.addBid(new Order(buyPrice, buyAmountPossible, Type.BID));
 				//start_index += window_size ; 
 			}
@@ -116,7 +111,6 @@ public class ForecastStrategy implements Strategy{
 			
 		}
 
-		System.out.println(currentTime + "and" + sellLimitTime);
 		// si il reste du temps pour vendre
 		if (currentTime <= sellLimitTime && m.getWallet().getAmount(m.cur1).compareTo(m.getAmountPrecision()) > 0) {
 
@@ -153,7 +147,6 @@ public class ForecastStrategy implements Strategy{
 		
 		System.out.println("your bids" + m.getOpenBids());
 		System.out.println("your asks" + m.getOpenAsks());
-		System.out.println("your executedbids" + m.getExecutedBids());
 		System.out.println("end");
 		m.waitTimeDelta();
 

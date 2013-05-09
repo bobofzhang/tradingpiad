@@ -14,6 +14,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import arbitrage.Arbitrage;
 import arbitrage.CompetitivePrice;
 
@@ -35,6 +37,7 @@ import strategies.marketmaking.ProfitMarketMaking;
 import utilities.CircularArray;
 import utilities.Decimal;
 import utilities.Item;
+import utilities.Op;
 import market.Currency;
 import market.DataRetriever;
 import market.ExchangeError;
@@ -51,7 +54,7 @@ import market.mtgox.MarketMtgoxHistory;
 import market.mtgox.MarketMtgoxVirtual;
 
 public class Main2 {
-	public static void main(String[] args) throws ExchangeError, NoSuchAlgorithmException, KeyManagementException, IOException {
+	public static void main(String[] args) throws ExchangeError, NoSuchAlgorithmException, KeyManagementException, IOException, ParseException {
 		
 		// Pour que ca fonctionne a l'univ !
 		System.setProperty("java.net.useSystemProxies", "true");
@@ -212,32 +215,39 @@ public class Main2 {
         //TestIndicator.test();
 		
 		/*try {
-			MarketPast.retrieveMtgox("mtgox01042013_01052013.txt", Currency.USD, "01/04/2013", "01/05/2013");
+			MarketPast.retrieveMtgox("mtgox30042012_04052013.txt", Currency.USD, "30/04/2013", "04/05/2013");
 		} catch (ParseException e) {
 			System.out.println("erreur dates");
 		}*/
 		
 		
 		
-		runStratPast("mtgox28042013_05052013.txt");
+		runStratPast("mtgox01082012_15082012.txt");
 		//paramEstimation("mtgox28042013_05052013.txt");
         //displayChart();
 		//runStrat();
 		
 		//testArbitrage();
 		//recolteArbitrage("arbitragedata0805");
+		
+		
+		
+		//recolteMegaTest();
+		//runMegaSimulation();
+		
+		//runStratBtce("btce48h_3003.txt");
 	}
 	
-	public static void runStratPast(String filename) throws ExchangeError{
+	public static BigDecimal runStratPast(String filename) throws ExchangeError{
 		Wallet wal=new Wallet();
 		wal.setAmount(Currency.USD, new BigDecimal("1000"));
 		wal.setAmount(Currency.BTC, new BigDecimal("0"));
 		Market[] listMarket ={new MarketPast(filename,wal,5000)};
 		
 		
-		//Strategy mmaking= new ProfitMarketMaking(listMarket[0], new Decimal("0.01"), 3600, new Decimal("0.00005"));
-		//Strategy mmaking= new AchatVente(new Decimal("0.15"));
-		Strategy mmaking = new ForecastStrategy(new Decimal("0.3"),10);
+		Strategy mmaking= new ProfitMarketMaking(listMarket[0], new Decimal("0.001"), 3600, new Decimal("0.001"));
+		//Strategy mmaking= new AchatVente(new Decimal("0.2"));
+		//Strategy mmaking = new ForecastStrategy(new Decimal("0.6"),10);
 		Agent a=new Agent(mmaking,listMarket,wal);
 		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);
 		a.addObserver(o);
@@ -248,6 +258,30 @@ public class Main2 {
 		 System.out.println("maxdd="+o.maxDrawDown());
 		 System.out.println("mean="+o.mean());
 		 System.out.println("var="+o.standardDeviation());
+		 return StrategyObserver.evalueWallet(Currency.USD, listMarket, wal);
+	}
+	
+	public static BigDecimal runStratBtce(String filename) throws ExchangeError{
+		Wallet wal=new Wallet();
+		wal.setAmount(Currency.USD, new BigDecimal("1000"));
+		wal.setAmount(Currency.BTC, new BigDecimal("0"));
+		Market[] listMarket ={new MarketBtceHistory(Currency.BTC, Currency.USD, wal, filename)};
+		
+		
+		Strategy mmaking= new ProfitMarketMaking(listMarket[0], new Decimal("0.001"), 3600, new Decimal("0.001"));
+		//Strategy mmaking= new AchatVente(new Decimal("0.2"));
+		//Strategy mmaking = new ForecastStrategy(new Decimal("0.6"),10);
+		Agent a=new Agent(mmaking,listMarket,wal);
+		StrategyObserver o=new StrategyObserver(6*3600000,Currency.USD);
+		a.addObserver(o);
+		a.execute();
+		 new SwingWrapper(o.getChart()).displayChart();
+		 new SwingWrapper(listMarket[0].getTs().getChart()).displayChart();
+		 
+		 System.out.println("maxdd="+o.maxDrawDown());
+		 System.out.println("mean="+o.mean());
+		 System.out.println("var="+o.standardDeviation());
+		 return StrategyObserver.evalueWallet(Currency.USD, listMarket, wal);
 	}
 	
 	
@@ -286,26 +320,31 @@ public class Main2 {
 		DataRetriever.retrieveMultipleMarketData(marketList, runName);
 	}
 	
-	public static void testArbitrage() throws ExchangeError{
+	public static BigDecimal testArbitrage() throws ExchangeError{
 		Market[] marketList= new Market[3];
 		Wallet w= new Wallet();
 		
-		w.setAmount(Currency.USD, new Decimal("1000"));
-		w.setAmount(Currency.BTC, new Decimal("10"));
-		w.setAmount(Currency.LTC, new Decimal("400"));
+		w.setAmount(Currency.USD, new Decimal("500"));
+		w.setAmount(Currency.BTC, new Decimal("0.5"));
+		w.setAmount(Currency.LTC, new Decimal("10"));
 
-		marketList[0]=new MarketBtceHistory(Currency.BTC, Currency.USD, w, "arbitragedata0405BTC-USD");
-		marketList[1]=new MarketBtceHistory(Currency.LTC, Currency.USD, w, "arbitragedata0405LTC-USD"); 
-		marketList[2]=new MarketBtceHistory(Currency.LTC, Currency.BTC, w, "arbitragedata0405LTC-BTC");
+		marketList[0]=new MarketPast("arbitragedata0405_hist_BTC-USD",w,5000);
+		marketList[1]=new MarketPast("arbitragedata0405_hist_LTC-USD",w,5000); 
+		marketList[2]=new MarketPast("arbitragedata0405_hist_LTC-BTC",w,5000);
 		PriceManager priceManager= new CompetitivePrice();
 		Strategy strat=new Arbitrage(priceManager,marketList);
 		Agent agent =new Agent(strat, marketList, w);
-		StrategyObserver o=new StrategyObserver(60000,Currency.USD);
+		StrategyObserver o=new StrategyObserver(180000,Currency.USD);
 		agent.addObserver(o);
 		agent.execute();
-		 new SwingWrapper(o.getChart()).displayChart();
+		new SwingWrapper(o.getChart()).displayChart();
+		 new SwingWrapper(marketList[0].getTs().getChart()).displayChart();
+		 new SwingWrapper(marketList[1].getTs().getChart()).displayChart();
+		 new SwingWrapper(marketList[2].getTs().getChart()).displayChart();
 		 
 		 System.out.println("maxdd="+o.maxDrawDown());
+		 
+		 return StrategyObserver.evalueWallet(Currency.USD, marketList, w);
 	}
 	
 	public static void displayChart(List<Number> x,List<Number> y,String title, String xmsg,String ymsg ){
@@ -373,6 +412,52 @@ public class Main2 {
 		
 		displayChart(x,y,"Gain moyen en fonction de la taille de la fenetre de temps","Gain moyen","Fenetre de temps");
 		displayChart(x,yvar,"Ecart type gain en fonction de la taille de la fenetre de temps","Ecart type gain","Fenetre de temps");
+	}
+	
+	public static void recolteMegaTest() throws ParseException{
+		String [] month={"09","10","11","12","01","02","03","04"};
+		String [] year={"2012","2012","2012","2012","2013","2013","2013","2013"};
+		
+		String [] startDay={"01","08","15","22"};
+		String [] endDay={"07","14","21","28"};
+		
+		for(int i=0;i<month.length;i++){
+			for(int j=0;j<startDay.length;j++){
+				MarketPast.retrieveMtgox("megarecolte/mtgox"+startDay[j]+month[i]+year[i], Currency.USD, startDay[j]+"/"+month[i]+"/"+year[i], endDay[j]+"/"+month[i]+"/"+year[i]);
+				System.out.println(startDay[j]+"/"+month[i]+"/"+year[i]+ "done.");
+			}
+		}
+	}
+	
+	public static void runMegaSimulation() throws ExchangeError{
+		String [] month={"09","10","11","12","01","02","03","04"};
+		String [] year={"2012","2012","2012","2012","2013","2013","2013","2013"};
+		
+		String [] startDay={"01","08","15","22"};
+		String [] endDay={"07","14","21","28"};
+		
+		ArrayList<BigDecimal> gains =new ArrayList<BigDecimal>(4*12);
+		BigDecimal maxloss=Decimal.ZERO;
+		for(int i=0;i<month.length;i++){
+			for(int j=0;j<startDay.length;j++){
+				BigDecimal value=runStratPast("megarecolte/mtgox"+startDay[j]+month[i]+year[i]);
+				BigDecimal g=Op.sub(Op.div(value, new Decimal("1000")), Decimal.ONE);
+				gains.add(g);
+				if(Op.inf0(g) && Op.neg(g).compareTo(maxloss)>0){
+					maxloss=Op.neg(g);
+				}
+			}
+		}
+		
+		DescriptiveStatistics stats = new DescriptiveStatistics();
+		
+		for( int i = 0; i < gains.size(); i++) {
+		        stats.addValue(gains.get(i).doubleValue());
+		}
+		
+		System.out.println("MEAN="+stats.getMean());
+		System.out.println("VAR="+stats.getVariance());
+		System.out.println("MAXLOSS="+maxloss);
 	}
 	
 

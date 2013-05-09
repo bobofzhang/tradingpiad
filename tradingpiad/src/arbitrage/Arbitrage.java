@@ -63,7 +63,7 @@ public class Arbitrage implements Strategy {
 			Agent.removeAllOrder(marketTab);
 			System.out.println(marketTab[0].getWallet());
 		
-		this.setInvestAmount(new Decimal("0.05"), marketTab[0].getWallet());
+		this.setInvestAmount(new Decimal("0.0001"), marketTab[0].getWallet());
 		
 		
 		List<CustomEdge> serieEchangesOpt=this.getSerieEchangesOpt();

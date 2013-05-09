@@ -42,7 +42,7 @@ public abstract class MarketMakingSkeleton implements Strategy{
 		BigDecimal sellPrice=getSellPrice(); // Le prix d'achat calcule
 		BigDecimal buyAmount=getBuyAmount(); // La  quantite que l'on va peut etre acheter
 		BigDecimal sellAmount=getSellAmount(); // La quantite que l'on va peut etre vendre
-		
+		/*
 		
 		System.out.println("ticker.buy="+m.getTicker().buy);
 		System.out.println("ticker.sell"+m.getTicker().sell);
@@ -50,15 +50,15 @@ public abstract class MarketMakingSkeleton implements Strategy{
 		System.out.println("buyPrice="+buyPrice);
 		System.out.println("sellPrice="+sellPrice);
 		System.out.println("buyAmount="+buyAmount);
-		System.out.println("sellAmount="+sellAmount);
+		System.out.println("sellAmount="+sellAmount);*/
 		
 		if(sellAmount.compareTo(m.getPricePrecision())>0) // Si on a determine qu'on pouvait encore acheter
 			m.addAsk(new Order(sellPrice,sellAmount,Type.ASK));
 		if(buyAmount.compareTo(m.getPricePrecision())>0) // Si on a determine qu'on pouvait encore vendre
 			m.addBid(new Order(buyPrice, buyAmount, Type.BID));
 		
-		System.out.println("Open bids :"+m.getOpenBids());
-		System.out.println("Open asks :"+m.getOpenAsks());
+		//System.out.println("Open bids :"+m.getOpenBids());
+		//System.out.println("Open asks :"+m.getOpenAsks());
 		
 		m.waitTimeDelta();// On passe au temps t+1
 		

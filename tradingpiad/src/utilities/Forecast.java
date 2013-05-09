@@ -97,7 +97,7 @@ public class Forecast {
 	 */
 	public boolean is_forecast_negatif(){
 		
-		System.out.println("is_forecast-negatif"+(double)((double)nb_positive/(double)limit_number));
+		//System.out.println("is_forecast-negatif"+(double)((double)nb_positive/(double)limit_number));
 		
 		if((double)((double)nb_negatif/(double)limit_number)>0.7){
 			return true ;
